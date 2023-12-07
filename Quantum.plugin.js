@@ -28,10 +28,6 @@ module.exports = class Quantum {
   }
 
   stop() {
-    this.elementsIds.forEach((elementId) => {
-      document.getElementById(elementId).remove();
-    });
-
     BdApi.Patcher.unpatchAll("encryptMessage");
   }
 
