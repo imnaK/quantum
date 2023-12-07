@@ -5,6 +5,72 @@
  * @version 0.0.1
  */
 
+// quantum code
+
+const commandPrefix = "§";
+const sets = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"];
+const safeNumber = (num, mod) => ((num % mod) + mod) % mod;
+
+function rot(msg, num) {
+  let ret = "";
+  for (let i = 0; i < msg.length; i++) {
+    let add = msg[i];
+    for (let j = 0; j < sets.length; j++)
+      if (sets[j].indexOf(msg[i]) !== -1)
+        add =
+          sets[j][safeNumber(sets[j].indexOf(msg[i]) + num, sets[j].length)];
+    ret += add;
+  }
+  return ret;
+}
+
+function cryptTest() {
+  let xcha20 = new XChaCha20();
+  let message = "test message";
+  let key = Buffer.from(
+    "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f",
+    "hex"
+  );
+  let nonce = Buffer.from(
+    "404142434445464748494a4b4c4d4e4f5051525354555658",
+    "hex"
+  );
+
+  (async function () {
+    let blockCounter = 1; // Optional, defaults to 1 per the RFC
+    let ciphertext = await xcha20.encrypt(message, nonce, key, blockCounter);
+    let plaintext = await xcha20.decrypt(ciphertext, nonce, key, blockCounter);
+    console.log(ciphertext, plaintext);
+    console.log(plaintext.toString() === message); // true
+  })();
+}
+
+module.exports = class Quantum {
+  constructor(meta) {}
+
+  start() {
+    let _sendMessage = BdApi.Webpack.getModule(
+      BdApi.Webpack.Filters.byProps("_sendMessage")
+    );
+    BdApi.Patcher.before(
+      "encryptMessage",
+      _sendMessage,
+      "sendMessage",
+      (_, args) => {
+        if (args[1].content.startsWith(commandPrefix))
+          args[1].content =
+            commandPrefix +
+            rot(args[1].content.substring(commandPrefix.length), 13);
+        cryptTest();
+      }
+    );
+  }
+
+  stop() {
+    BdApi.Patcher.unpatchAll("encryptMessage");
+  }
+};
+
 const crypto = require("crypto");
 
 // code from https://www.npmjs.com/package/xchacha20-js
@@ -666,69 +732,3 @@ class XChaCha20 {
     );
   }
 }
-
-// quantum code
-
-const commandPrefix = "§";
-const sets = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"];
-const safeNumber = (num, mod) => ((num % mod) + mod) % mod;
-
-function rot(msg, num) {
-  let ret = "";
-  for (let i = 0; i < msg.length; i++) {
-    let add = msg[i];
-    for (let j = 0; j < sets.length; j++)
-      if (sets[j].indexOf(msg[i]) !== -1)
-        add =
-          sets[j][safeNumber(sets[j].indexOf(msg[i]) + num, sets[j].length)];
-    ret += add;
-  }
-  return ret;
-}
-
-function cryptTest() {
-  let xcha20 = new XChaCha20();
-  let message = "test message";
-  let key = Buffer.from(
-    "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f",
-    "hex"
-  );
-  let nonce = Buffer.from(
-    "404142434445464748494a4b4c4d4e4f5051525354555658",
-    "hex"
-  );
-
-  (async function () {
-    let blockCounter = 1; // Optional, defaults to 1 per the RFC
-    let ciphertext = await xcha20.encrypt(message, nonce, key, blockCounter);
-    let plaintext = await xcha20.decrypt(ciphertext, nonce, key, blockCounter);
-    console.log(ciphertext, plaintext);
-    console.log(plaintext.toString() === message); // true
-  })();
-}
-
-module.exports = class Quantum {
-  constructor(meta) {}
-
-  start() {
-    let _sendMessage = BdApi.Webpack.getModule(
-      BdApi.Webpack.Filters.byProps("_sendMessage")
-    );
-    BdApi.Patcher.before(
-      "encryptMessage",
-      _sendMessage,
-      "sendMessage",
-      (_, args) => {
-        if (args[1].content.startsWith(commandPrefix))
-          args[1].content =
-            commandPrefix +
-            rot(args[1].content.substring(commandPrefix.length), 13);
-        cryptTest();
-      }
-    );
-  }
-
-  stop() {
-    BdApi.Patcher.unpatchAll("encryptMessage");
-  }
-};
