@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "xchacha20-js": "^0.3.1"
+  }
+}
