@@ -6,20 +6,11 @@
  */
 
 module.exports = class Quantum {
-  elementPrefix = "quantum-";
   commandPrefix = "§";
-  elementsIds = [];
 
   constructor(meta) {}
 
   start() {
-    const myButton = document.createElement("button");
-    myButton.textContent = "Click me!";
-    myButton.addEventListener("click", () => {
-      window.alert("Hello World!");
-    });
-    this.addElement(myButton, "my-button");
-
     let _sendMessage = BdApi.Webpack.getModule(
       BdApi.Webpack.Filters.byProps("_sendMessage")
     );
@@ -63,13 +54,5 @@ module.exports = class Quantum {
       ret += add;
     }
     return ret;
-  }
-
-  addElement(el, id) {
-    const newId = this.elementPrefix + id;
-    const root = document.getElementById("app-mount");
-    el.id = newId;
-    this.elementsIds.push(newId);
-    root.append(el);
   }
 };
