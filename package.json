@@ -1,0 +1,52 @@
+{
+  "name": "quantum",
+  "version": "0.0.1",
+  "description": "A Better Discord plugin that adds encryption and decryption functionalities for direct messages.",
+  "repository": "github:imnaK/quantum",
+  "keywords": [
+    "Better",
+    "Discord",
+    "Encryption",
+    "XChaCha20",
+    "Poly1305",
+    "Privacy",
+    "Security",
+    "Direct",
+    "Message",
+    "Messaging",
+    "Encryption",
+    "Secure",
+    "JavaScript",
+    "Discord",
+    "Crypto",
+    "Authentication"
+  ],
+  "author": {
+    "name": "imnaK",
+    "url": "https://github.com/imnaK"
+  },
+  "contributors": [
+    {
+      "name": "Traube",
+      "url": "https://github.com/Traube1000101"
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/imnaK/quantum#readme",
+  "bugs": {
+    "url": "https://github.com/imnaK/quantum/issues"
+  },
+  "main": "Quantum.plugin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --progress --color"
+  },
+  "private": true,
+  "dependencies": {
+    "branca": "^0.5.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
