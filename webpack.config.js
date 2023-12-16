@@ -22,6 +22,9 @@ module.exports = {
   target: "node",
   devtool: false,
   watch: true,
+  watchOptions: {
+    ignored: /node_modules/,
+  },
   entry: "./src/quantum.js",
   output: {
     filename: "Quantum.plugin.js",
