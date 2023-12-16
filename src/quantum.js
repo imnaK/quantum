@@ -1,4 +1,7 @@
-import Rot from "./rot";
+import branca from "branca";
+import secret from "./.secret.json";
+
+const XChaCha20_Poly1305 = new branca(secret.key);
 
 export default class Quantum {
   commandPrefix = "q:";
@@ -17,7 +20,7 @@ export default class Quantum {
         if (args[1].content.startsWith(this.commandPrefix))
           args[1].content =
             this.commandPrefix +
-            Rot(args[1].content.substring(this.commandPrefix.length), 13);
+            XChaCha20_Poly1305.encode(args[1].content.substring(this.commandPrefix.length));
       }
     );
   }
