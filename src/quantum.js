@@ -1,7 +1,7 @@
 import Rot from "./rot";
 
 export default class Quantum {
-  commandPrefix = "\u269B\uFE0F";
+  commandPrefix = "q:";
 
   constructor(meta) {}
 
