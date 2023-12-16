@@ -49,7 +49,7 @@ module.exports = {
             if (process.platform === "win32") return process.env.APPDATA;
             if (process.platform === "darwin") return path.join(process.env.HOME, "Library", "Application Support");
             if (process.env.XDG_CONFIG_HOME) return process.env.XDG_CONFIG_HOME;
-            return path.join(process.env.HOME, "Library", ".config");
+            return path.join(process.env.HOME, ".config");
           })();
           const bdFolder = path.join(userConfig, "BetterDiscord");
           const bdPluginFolder = path.join(bdFolder, "plugins", filename);
