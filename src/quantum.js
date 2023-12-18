@@ -18,12 +18,11 @@ export default class Quantum {
       _sendMessage,
       "sendMessage",
       (_, args) => {
-        if (args[1].content.startsWith(this.commandPrefix))
-          args[1].content =
-            this.commandPrefix +
-            XChaCha20_Poly1305.encode(
-              args[1].content.substring(this.commandPrefix.length)
-            );
+        if (args[1].content.startsWith(this.commandPrefix)) {
+          let message = args[1].content.substring(this.commandPrefix.length);
+          let encryptedMessage = XChaCha20_Poly1305.encode(message);
+          args[1].content = this.commandPrefix + encryptedMessage;
+        }
       }
     );
 
@@ -44,14 +43,24 @@ export default class Quantum {
   handleMessage(_, args) {
     try {
       if (args[0].type !== "MESSAGE_CREATE") return;
-
-      const decoder = new TextDecoder();
-
       let { message } = args[0];
+      const decoder = new TextDecoder();
       if (message.content.startsWith(this.commandPrefix)) {
-        console.log("Received quantum message, starting decryption...")
-        let decryptedUint8Array = XChaCha20_Poly1305.decode(message.content.substring(this.commandPrefix.length))
-        console.log("Decrypted Message: " + decoder.decode(decryptedUint8Array));
+        console.log("Detected quantum message! I shall decrypt...");
+        let decryptedUint8Array = XChaCha20_Poly1305.decode(
+          message.content.substring(this.commandPrefix.length)
+        );
+        console.log(
+          "%c" +
+            message.author.globalName +
+            " %c" +
+            message.author.username +
+            "%c\n" +
+            decoder.decode(decryptedUint8Array),
+          "font-size:1.3em; font-weight:bolder; margin-bottom:0.3em;",
+          "font-weight:100;",
+          "font-size:1.3em;"
+        );
       }
     } catch (e) {
       console.log(error(`${e}`));
