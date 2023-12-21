@@ -50,13 +50,14 @@ export default class Quantum {
         let decryptedUint8Array = XChaCha20_Poly1305.decode(
           message.content.substring(this.commandPrefix.length)
         );
+        let decodedMessage = decoder.decode(decryptedUint8Array);
         console.log(
           "%c" +
             message.author.globalName +
             " %c" +
             message.author.username +
             "%c\n" +
-            decoder.decode(decryptedUint8Array),
+            decodedMessage,
           "font-size:1.3em; font-weight:bolder; margin-bottom:0.3em;",
           "font-weight:100;",
           "font-size:1.3em;"
