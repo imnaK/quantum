@@ -1,5 +1,5 @@
 const webpack = require("webpack");
-const path = require('path');
+const path = require("path");
 const fs = require("fs");
 
 const pkg = require("./package.json");
@@ -20,7 +20,6 @@ const meta = (() => {
   return lines.join("\n");
 })();
 
-
 module.exports = {
   mode: "development",
   target: "node",
@@ -38,7 +37,13 @@ module.exports = {
     compareBeforeEmit: false,
   },
   resolve: {
-    extensions: [".js"],
+    extensions: [".js", ".jsx", ".css"],
+  },
+  module: {
+    rules: [
+      { test: /\.css$/, use: "raw-loader" },
+      { test: /\.jsx$/, exclude: /node_modules/, use: "babel-loader" },
+    ],
   },
   plugins: [
     new webpack.BannerPlugin({ raw: true, banner: meta }),
@@ -47,16 +52,32 @@ module.exports = {
         compiler.hooks.assetEmitted.tap("copyPlugin2Dir", (filename, info) => {
           const userConfig = (() => {
             if (process.platform === "win32") return process.env.APPDATA;
-            if (process.platform === "darwin") return path.join(process.env.HOME, "Library", "Application Support");
+            if (process.platform === "darwin")
+              return path.join(
+                process.env.HOME,
+                "Library",
+                "Application Support"
+              );
             if (process.env.XDG_CONFIG_HOME) return process.env.XDG_CONFIG_HOME;
             return path.join(process.env.HOME, ".config");
           })();
           const bdFolder = path.join(userConfig, "BetterDiscord");
           const bdPluginFolder = path.join(bdFolder, "plugins", filename);
           fs.copyFileSync(info.targetPath, bdPluginFolder);
-          console.log("\ncopied " + ccGreen + filename + ccReset + " to \"" + bdPluginFolder + "\" " + ccGreen + "successfully" + ccReset);
+          console.log(
+            "\ncopied " +
+              ccGreen +
+              filename +
+              ccReset +
+              ' to "' +
+              bdPluginFolder +
+              '" ' +
+              ccGreen +
+              "successfully" +
+              ccReset
+          );
         });
-      }
-    }
+      },
+    },
   ],
 };

@@ -1,10 +1,13 @@
-import branca from "branca";
+import dataStructure from "./dataStructure";
 import secret from "./.secret.json";
+
+import branca from "branca";
 
 const XChaCha20_Poly1305 = new branca(secret.key);
 const { Patcher, Webpack } = BdApi;
 
 export default class Quantum {
+  logPrefix = "Quantum - ";
   commandPrefix = "q:";
 
   constructor(meta) {}
@@ -67,4 +70,10 @@ export default class Quantum {
       console.log(error(`${e}`));
     }
   }
+
+  // getSettingsPanel() {
+  //   const data = new dataStructure();
+
+  //   data.encrypt();
+  // }
 }
