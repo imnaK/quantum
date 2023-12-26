@@ -1,4 +1,5 @@
 import Quantum from "./quantum";
+import InputField from "./inputField";
 
 import * as fs from "fs";
 import branca from "branca";
@@ -17,7 +18,9 @@ export default class dataStructure {
     //const XChaCha20_Poly1305 = new branca();
     //const key1 = scryptSync("password", userId, 64);
 
-    this.passwordWindow();
+    showPasswordModal((value) => {
+      console.log("Password confirmed - Value: " + value);
+    });
   }
 
   save() {
@@ -45,41 +48,24 @@ export default class dataStructure {
   }
 
   encrypt() {}
+}
 
-  passwordWindow() {
+function showPasswordModal(callback) {
+  const inputRef = BdApi.React.createRef();
 
-    function InputField(props) {
-      return (
-        <input
-          type="password"
-          placeholder={props.placeholder || ""}
-          onKeyDown={props?.onKeyDown}
-          ref={passwordInput}
-        />
-      );
-    }
-
-    function passwordConfirmed(event) {
-      console.log(Quantum.logPrefix + "Enter pressed - Value: ");
-    }
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Enter") {
-        console.log(event.target.value);
-        passwordConfirmed();
-        BdApi.findModuleByProps("closeModal").closeModal(modalId);
-      }
-    };
-
-    let modalId = BdApi.UI.showConfirmationModal(
-      "Quantum Password",
-      <InputField onKeyDown={handleKeyDown} />,
-      {
-        confirmText: "Enter",
-        cancelText: "Nevermind",
-        onConfirm: () => passwordConfirmed(),
-        onCancel: () => console.log("Pressed 'Nevermind'"),
-      }
-    );
+  const handleConfirm = () => {
+    callback(inputRef.current.getValue());
+    BdApi.findModuleByProps("closeModal").closeModal(modalId);
   }
+
+  let modalId = BdApi.UI.showConfirmationModal(
+    "Quantum Password",
+    <InputField ref={inputRef} handleConfirm={handleConfirm} />,
+    {
+      confirmText: "Enter",
+      cancelText: "Nevermind",
+      onConfirm: handleConfirm,
+      onCancel: () => console.log("Pressed 'Nevermind'"),
+    }
+  );
 }

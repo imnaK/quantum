@@ -71,9 +71,9 @@ export default class Quantum {
     }
   }
 
-  // getSettingsPanel() {
-  //   const data = new dataStructure();
+  getSettingsPanel() {
+    const data = new dataStructure();
 
-  //   data.encrypt();
-  // }
+    data.encrypt();
+  }
 }
