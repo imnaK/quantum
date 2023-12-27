@@ -1,5 +1,6 @@
 import dataStructure from "./dataStructure";
 import secret from "./.secret.json";
+import stylesheet from "./stylesheet.css";
 
 import branca from "branca";
 
@@ -7,14 +8,18 @@ const XChaCha20_Poly1305 = new branca(secret.key);
 const { Patcher, Webpack } = BdApi;
 
 export default class Quantum {
-  logPrefix = "Quantum - ";
   commandPrefix = "q:";
+  data = null;
 
-  constructor(meta) {}
+  constructor(meta) {
+    this.meta = meta;
+  }
 
   start() {
+    //this.data = new dataStructure();
+
     let _sendMessage = Webpack.getModule(
-      Webpack.Filters.byProps("_sendMessage")
+      Webpack.Filters.byKeys("_sendMessage")
     );
     BdApi.Patcher.before(
       "encryptMessage",
@@ -29,19 +34,30 @@ export default class Quantum {
       }
     );
 
-    let dispatchModule = BdApi.findModuleByProps("dispatch", "subscribe");
+    let dispatchModule = Webpack.getModule(
+      Webpack.Filters.byKeys("dispatch", "subscribe")
+    );
     Patcher.after(
       "receiveMessage",
       dispatchModule,
       "dispatch",
       this.handleMessage.bind(this)
     );
+
   }
 
   stop() {
     Patcher.unpatchAll("encryptMessage");
     Patcher.unpatchAll("receiveMessage");
+
+    BdApi.DOM.removeStyle(this.meta.name);
   }
+
+  // getSettingsPanel() {
+  //   console.log(
+  //     Webpack.getModule(Webpack.Filters.byKeys("switchSynchronously"))
+  //   );
+  // }
 
   handleMessage(_, args) {
     try {
@@ -49,12 +65,12 @@ export default class Quantum {
       let { message } = args[0];
       const decoder = new TextDecoder();
       if (message.content.startsWith(this.commandPrefix)) {
-        console.log("Detected quantum message! I shall decrypt...");
+        Quantum.log("Detected  message! I shall decrypt...");
         let decryptedUint8Array = XChaCha20_Poly1305.decode(
           message.content.substring(this.commandPrefix.length)
         );
         let decodedMessage = decoder.decode(decryptedUint8Array);
-        console.log(
+        Quantum.log(
           "%c" +
             message.author.globalName +
             " %c" +
@@ -67,13 +83,33 @@ export default class Quantum {
         );
       }
     } catch (e) {
-      console.log(error(`${e}`));
+      Quantum.error(e);
     }
   }
 
-  getSettingsPanel() {
-    const data = new dataStructure();
+  // Console message with prefix
+  static consoleMessage(consoleFunction, ...args) {
+    let prefix = "[Quantum]";
+    let prefixStyle = "color: DeepSkyBlue; font-weight: bolder;";
 
-    data.encrypt();
+    // Tests if css is used in arguments
+    if (typeof args[0] === "string" && args[0].includes("%c")) {
+      args[0] = "%c" + prefix + "%c " + args[0]; // Prepends prefix to first argument & resets styles
+      args.splice(1, 0, prefixStyle, ""); // Inserts prefix's style & empty style (reset) before argument's style
+      consoleFunction(...args);
+    }
+    // Otherwise append arguments to end
+    else {
+      consoleFunction("%c" + prefix, prefixStyle, ...args);
+    }
+  }
+  static log(...args) {
+    this.consoleMessage(console.log, ...args);
+  }
+  static warn(...args) {
+    this.consoleMessage(console.warn, ...args);
+  }
+  static error(...args) {
+    this.consoleMessage(console.error, ...args);
   }
 }
