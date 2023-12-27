@@ -12,7 +12,8 @@ export default BdApi.React.forwardRef((props, ref) => {
 
   return (
     <input
-      type="password"
+      type={props.type || "text"}
+      className="quantum inputField"
       placeholder={props.placeholder || ""}
       onKeyDown={handleKeyDown}
       ref={inputRef}
