@@ -44,6 +44,7 @@ export default class Quantum {
       this.handleMessage.bind(this)
     );
 
+    BdApi.DOM.addStyle(this.meta.name, stylesheet);
   }
 
   stop() {
