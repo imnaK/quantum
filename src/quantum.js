@@ -16,35 +16,27 @@ export default class Quantum {
   }
 
   start() {
-    //this.data = new dataStructure();
-
-    let _sendMessage = Webpack.getModule(
-      Webpack.Filters.byKeys("_sendMessage")
-    );
-    BdApi.Patcher.before(
-      "encryptMessage",
-      _sendMessage,
-      "sendMessage",
-      (_, args) => {
-        if (args[1].content.startsWith(this.commandPrefix)) {
-          let message = args[1].content.substring(this.commandPrefix.length);
-          let encryptedMessage = XChaCha20_Poly1305.encode(message);
-          args[1].content = this.commandPrefix + encryptedMessage;
-        }
-      }
-    );
-
-    let dispatchModule = Webpack.getModule(
-      Webpack.Filters.byKeys("dispatch", "subscribe")
-    );
-    Patcher.after(
-      "receiveMessage",
-      dispatchModule,
-      "dispatch",
-      this.handleMessage.bind(this)
-    );
-
+    // this.data = new dataStructure();
     BdApi.DOM.addStyle(this.meta.name, stylesheet);
+
+    let _sendMessageModule = Webpack.getModule(Webpack.Filters.byKeys("_sendMessage"));
+    BdApi.Patcher.before("encryptMessage", _sendMessageModule, "sendMessage", (_, args) => {
+      if (args[1].content.startsWith(this.commandPrefix)) {
+        let message = args[1].content.substring(this.commandPrefix.length);
+        let encryptedMessage = XChaCha20_Poly1305.encode(message);
+        args[1].content = this.commandPrefix + encryptedMessage;
+      }
+    });
+
+    let dispatchModule = Webpack.getModule(Webpack.Filters.byKeys("dispatch", "subscribe"));
+    Patcher.after("receiveMessage", dispatchModule, "dispatch", this.handleMessage.bind(this));
+
+    let switchAccountModule = Webpack.getModule(Webpack.Filters.byKeys("switchAccount"));
+    Patcher.after("switchAccount", switchAccountModule, "switchAccount", (_, args) => {
+      this.data = new dataStructure(args[0]);
+      Quantum.log("UserId of constructor: ", this.data.userId, "\nUserId of switchAccount function: ", args[0]);
+      this.data.userId = args[0];
+    });
   }
 
   stop() {
@@ -54,12 +46,6 @@ export default class Quantum {
     BdApi.DOM.removeStyle(this.meta.name);
   }
 
-  // getSettingsPanel() {
-  //   console.log(
-  //     Webpack.getModule(Webpack.Filters.byKeys("switchSynchronously"))
-  //   );
-  // }
-
   handleMessage(_, args) {
     try {
       if (args[0].type !== "MESSAGE_CREATE") return;
@@ -67,17 +53,10 @@ export default class Quantum {
       const decoder = new TextDecoder();
       if (message.content.startsWith(this.commandPrefix)) {
         Quantum.log("Detected  message! I shall decrypt...");
-        let decryptedUint8Array = XChaCha20_Poly1305.decode(
-          message.content.substring(this.commandPrefix.length)
-        );
+        let decryptedUint8Array = XChaCha20_Poly1305.decode(message.content.substring(this.commandPrefix.length));
         let decodedMessage = decoder.decode(decryptedUint8Array);
         Quantum.log(
-          "%c" +
-            message.author.globalName +
-            " %c" +
-            message.author.username +
-            "%c\n" +
-            decodedMessage,
+          "%c" + message.author.globalName + " %c" + message.author.username + "%c\n" + decodedMessage,
           "font-size:1.3em; font-weight:bolder; margin-bottom:0.3em;",
           "font-weight:100;",
           "font-size:1.3em;"
