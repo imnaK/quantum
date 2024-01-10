@@ -4,6 +4,7 @@ import InputField from "./inputField";
 import * as fs from "fs";
 import branca from "branca";
 import * as scryptJs from "scrypt-js";
+import * as scryptJs from "scrypt-js";
 
 const dataDirectory = __dirname + "/../quantum/";
 
@@ -63,6 +64,10 @@ export default class dataStructure {
 
     let encryptedData = this.encrypt(jsonData);
     Quantum.log("Encrypted data: ", encryptedData);
+    let jsonData = JSON.stringify(this.#dataObject);
+
+    let encryptedData = this.encrypt(jsonData);
+    Quantum.log("Encrypted data: ", encryptedData);
 
     if (!fs.existsSync(dataDirectory)) {
       fs.mkdirSync(dataDirectory, { recursive: true });
@@ -74,13 +79,22 @@ export default class dataStructure {
       }
       Quantum.log("Saved data to file");
     });
+    fs.writeFile(dataDirectory + "data_" + this.userId, Buffer.from(encryptedData), function (error) {
+      if (error) {
+        Quantum.error(error);
+        return -1;
+      }
+      Quantum.log("Saved data to file");
+    });
   }
 
   get(key) {
     return this.#dataObject[key];
+    return this.#dataObject[key];
   }
 
   set(key, value) {
+    this.#dataObject[key] = value;
     this.#dataObject[key] = value;
   }
 }
@@ -92,15 +106,20 @@ function showPasswordModal(callback) {
     callback(inputRef.current.getValue());
     BdApi.Webpack.getModule(BdApi.Webpack.Filters.byKeys("closeModal")).closeModal(modalId);
   };
+    BdApi.Webpack.getModule(BdApi.Webpack.Filters.byKeys("closeModal")).closeModal(modalId);
+  };
 
   let modalId = BdApi.UI.showConfirmationModal(
     "Quantum Password",
+    <InputField ref={inputRef} handleConfirm={handleConfirm} type="password" />,
     <InputField ref={inputRef} handleConfirm={handleConfirm} type="password" />,
     {
       confirmText: "Enter",
       cancelText: "Nevermind",
       onConfirm: handleConfirm,
       onCancel: () => Quantum.log("Pressed 'Nevermind'"),
+      onCancel: () => Quantum.log("Pressed 'Nevermind'"),
     }
   );
 }
+
