@@ -5,7 +5,7 @@ import stylesheet from "./stylesheet.css";
 import branca from "branca";
 
 const XChaCha20_Poly1305 = new branca(secret.key);
-const { Patcher, Webpack } = BdApi;
+const { Patcher, Webpack, ContextMenu } = BdApi;
 
 export default class Quantum {
   commandPrefix = "q:";
@@ -16,51 +16,37 @@ export default class Quantum {
   }
 
   start() {
-    // this.data = new dataStructure();
+    //this.data = new dataStructure();
     BdApi.DOM.addStyle(this.meta.name, stylesheet);
 
     let _sendMessageModule = Webpack.getModule(Webpack.Filters.byKeys("_sendMessage"));
-    BdApi.Patcher.before("encryptMessage", _sendMessageModule, "sendMessage", (_, args) => {
-      if (args[1].content.startsWith(this.commandPrefix)) {
-        let message = args[1].content.substring(this.commandPrefix.length);
-        let encryptedMessage = XChaCha20_Poly1305.encode(message);
-        args[1].content = this.commandPrefix + encryptedMessage;
-      }
-    });
-
-    let dispatchModule = Webpack.getModule(Webpack.Filters.byKeys("dispatch", "subscribe"));
-    Patcher.after("receiveMessage", dispatchModule, "dispatch", this.handleMessage.bind(this));
+    BdApi.Patcher.before("encryptMessage", _sendMessageModule, "sendMessage", this.handleMessageSend.bind(this));
 
     let switchAccountModule = Webpack.getModule(Webpack.Filters.byKeys("switchAccount"));
     Patcher.after("switchAccount", switchAccountModule, "switchAccount", (_, args) => {
-      this.data = new dataStructure(args[0]);
-      Quantum.log("UserId of constructor: ", this.data.userId, "\nUserId of switchAccount function: ", args[0]);
-      this.data.userId = args[0];
+      Quantum.log("Last User ID: ", this.data.userId, "\nSwitched User ID to: ", args[0]);
+      if (this.data.userId !== args[0]) {
+        this.data = new dataStructure(args[0]);
+      }
     });
+
+    this.unpatchMessageContextMenu = ContextMenu.patch("message", this.contextMenuCallback.bind(this));
   }
 
   stop() {
     Patcher.unpatchAll("encryptMessage");
-    Patcher.unpatchAll("receiveMessage");
+    this.unpatchMessageContextMenu();
 
     BdApi.DOM.removeStyle(this.meta.name);
   }
 
-  handleMessage(_, args) {
+  // Encrypts message before sending
+  handleMessageSend(_, args) {
     try {
-      if (args[0].type !== "MESSAGE_CREATE") return;
-      let { message } = args[0];
-      const decoder = new TextDecoder();
-      if (message.content.startsWith(this.commandPrefix)) {
-        Quantum.log("Detected  message! I shall decrypt...");
-        let decryptedUint8Array = XChaCha20_Poly1305.decode(message.content.substring(this.commandPrefix.length));
-        let decodedMessage = decoder.decode(decryptedUint8Array);
-        Quantum.log(
-          "%c" + message.author.globalName + " %c" + message.author.username + "%c\n" + decodedMessage,
-          "font-size:1.3em; font-weight:bolder; margin-bottom:0.3em;",
-          "font-weight:100;",
-          "font-size:1.3em;"
-        );
+      if (args[1].content.startsWith(this.commandPrefix)) {
+        let message = args[1].content.substring(this.commandPrefix.length);
+        let encryptedMessage = XChaCha20_Poly1305.encode(message);
+        args[1].content = this.commandPrefix + encryptedMessage;
       }
     } catch (e) {
       Quantum.error(e);
@@ -92,4 +78,56 @@ export default class Quantum {
   static error(...args) {
     this.consoleMessage(console.error, ...args);
   }
+
+  // Returns the text sum of all children of an element
+  getAllTextOfElement(element) {
+    const children = Array.from(element.querySelectorAll("*"));
+    const text = children.map((child) => child.textContent.replace(/\s/g, "")).join("");
+    return text;
+  }
+
+  // Creates and appends decrypt button to message context menu
+  contextMenuCallback = (tree, _) => {
+    this.messageId = _.message.id;
+    Quantum.log("props: ", tree.props.children);
+
+    tree.props.children[2].props.children.splice(
+      4,
+      0,
+      ContextMenu.buildItem({
+        label: "Nachricht entschlüsseln",
+        type: "text",
+        icon: () => {
+          return BdApi.React.createElement("img", {
+            src: "https://discord.com/assets/c417389113ed50a7ad11.svg",
+            width: "100%",
+            height: "100%",
+          });
+        },
+        action: (e) => {
+          let spanElement = document.querySelector("#message-content-" + this.messageId);
+
+          const text = this.getAllTextOfElement(spanElement);
+          const decoder = new TextDecoder();
+
+          if (text.startsWith(this.commandPrefix)) {
+            let decryptedUint8Array = XChaCha20_Poly1305.decode(text.substring(this.commandPrefix.length));
+            let decodedMessage = decoder.decode(decryptedUint8Array);
+
+            spanElement.innerHTML = "";
+
+            let firstSpanElement = document.createElement("span");
+            firstSpanElement.style.color = "DeepSkyBlue";
+            firstSpanElement.textContent = this.commandPrefix;
+            spanElement.appendChild(firstSpanElement);
+
+            let secondSpanElement = document.createElement("span");
+            secondSpanElement.textContent = decodedMessage;
+            secondSpanElement.id = "decrypted-message-" + this.messageId;
+            spanElement.appendChild(secondSpanElement);
+          }
+        },
+      })
+    );
+  };
 }
