@@ -99,8 +99,8 @@ export default class Quantum {
         type: "text",
         icon: () => {
           return BdApi.React.createElement("img", {
-            src: "https://discord.com/assets/c417389113ed50a7ad11.svg",
-            width: "100%",
+            src: "https://wiki.gbl.gg/images/d/d1/Among-Us-Red-Crewmate.png", // For testing, because funny
+            width: "auto",
             height: "100%",
           });
         },
