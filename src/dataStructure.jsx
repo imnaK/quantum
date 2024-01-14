@@ -31,8 +31,11 @@ export default class dataStructure {
       this.#hashedPassword = await scryptJs.scrypt(passwordUint8Array, userIdUint8Array, N, r, p, dkLen, (progress) => {
         console.log(Math.trunc(100 * progress) + "%");
       });
-      Quantum.log([...this.#hashedPassword].map((x) => x.toString(16).padStart(2, "0")).join(""));
+      // Quantum.log([...this.#hashedPassword].map((x) => x.toString(16).padStart(2, "0")).join(""));
+      this.load();
     });
+    
+
   }
 
   decrypt(encryptedData) {
@@ -49,7 +52,7 @@ export default class dataStructure {
     try {
       let encryptedData = fs.readFileSync(dataDirectory + "data_" + this.userId);
       let decryptedJsonData = this.decrypt(encryptedData);
-      let dataObject = JSON.parse(decryptedJsonData);
+      this.dataObject = JSON.parse(decryptedJsonData);
 
       console.log("Loaded & decrypted data object: ", dataObject);
     } catch (error) {
