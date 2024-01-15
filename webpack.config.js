@@ -2,6 +2,8 @@ const webpack = require("webpack");
 const path = require("path");
 const fs = require("fs");
 
+const TerserPlugin = require("terser-webpack-plugin");
+
 const pkg = require("./package.json");
 const pluginConfig = require("./config.json");
 pluginConfig.version = pkg.version;
@@ -28,9 +30,12 @@ module.exports = {
   watchOptions: {
     ignored: /node_modules/,
   },
-  entry: "./src/quantum.js",
+  entry: {
+    Quantum: "./src/quantum.js",
+    "Quantum.min": "./src/quantum.js",
+  },
   output: {
-    filename: "Quantum.plugin.js",
+    filename: "[name].plugin.js",
     path: path.join(__dirname, "build"),
     libraryTarget: "commonjs2",
     libraryExport: "default",
@@ -38,6 +43,28 @@ module.exports = {
   },
   resolve: {
     extensions: [".js", ".jsx", ".css"],
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        include: /\.min\.plugin\.js$/,
+        extractComments: false,
+        terserOptions: {
+          output: {
+            //comments: /@name|@description|@version|@author|^!/,
+            comments: (node, comment) => {
+              const text = comment.value;
+              const type = comment.type;
+              if (type == "comment2") {
+                // multiline comment
+                return /@name/.test(text) && /@description/.test(text) && /@version/.test(text) && /@author/.test(text);
+              }
+            },
+          },
+        },
+      }),
+    ],
   },
   module: {
     rules: [
@@ -61,6 +88,11 @@ module.exports = {
     {
       apply: (compiler) => {
         compiler.hooks.assetEmitted.tap("copyPlugin2Dir", (filename, info) => {
+          // Only copy files that end with min.plugin.js
+          if (!filename.endsWith("min.plugin.js")) {
+            return;
+          }
+
           const userConfig = (() => {
             if (process.platform === "win32") return process.env.APPDATA;
             if (process.platform === "darwin") return path.join(process.env.HOME, "Library", "Application Support");
