@@ -40,7 +40,7 @@ export default class Quantum {
     BdApi.DOM.removeStyle(this.meta.name);
   }
 
-  // Encrypts message before sending
+  // Encrypt message before sending, if it starts with the command prefix
   handleMessageSend(_, args) {
     try {
       if (args[1].content.startsWith(this.commandPrefix)) {
@@ -58,7 +58,7 @@ export default class Quantum {
     let prefix = "[Quantum]";
     let prefixStyle = "color: DeepSkyBlue; font-weight: bolder;";
 
-    // Tests if css is used in arguments
+    // Test if css is used in arguments
     if (typeof args[0] === "string" && args[0].includes("%c")) {
       args[0] = "%c" + prefix + "%c " + args[0]; // Prepends prefix to first argument & resets styles
       args.splice(1, 0, prefixStyle, ""); // Inserts prefix's style & empty style (reset) before argument's style
@@ -79,55 +79,94 @@ export default class Quantum {
     this.consoleMessage(console.error, ...args);
   }
 
-  // Returns the text sum of all children of an element
+  // Return the text sum of all children of an element
   getAllTextOfElement(element) {
     const children = Array.from(element.querySelectorAll("*"));
     const text = children.map((child) => child.textContent.replace(/\s/g, "")).join("");
     return text;
   }
 
-  // Creates and appends decrypt button to message context menu
+  // Create and append decrypt button to message context menu
   contextMenuCallback = (tree, _) => {
     this.messageId = _.message.id;
-    Quantum.log("props: ", tree.props.children);
+    const messageContentElement = document.querySelector("#message-content-" + this.messageId);
+    const text = this.getAllTextOfElement(messageContentElement);
 
-    tree.props.children[2].props.children.splice(
-      4,
-      0,
-      ContextMenu.buildItem({
-        label: "Nachricht entschlüsseln",
-        type: "text",
-        icon: () => {
-          return BdApi.React.createElement("img", {
-            src: "https://wiki.gbl.gg/images/d/d1/Among-Us-Red-Crewmate.png", // For testing, because funny
-            width: "auto",
-            height: "100%",
-          });
-        },
-        action: (e) => {
-          let spanElement = document.querySelector("#message-content-" + this.messageId);
+    // Checks if it's a Quantum message
+    if (text.startsWith(this.commandPrefix)) {
+      const quantumClass = "quantum";
+      
+      // Checks if the message is encrypted, then adds a decrypt button
+      if (messageContentElement.querySelector("." + quantumClass) === null) {
+        tree.props.children[2].props.children.splice(
+          4,
+          0,
+          ContextMenu.buildItem({
+            label: "Nachricht entschlüsseln",
+            type: "text",
+            icon: () => {
+              return BdApi.React.createElement("img", {
+                src: "https://static.wikia.nocookie.net/among-us-wiki/images/3/31/Red.png",
+                width: "auto",
+                height: "100%",
+              });
+            },
+            action: (e) => {
+              const decoder = new TextDecoder();
 
-          const text = this.getAllTextOfElement(spanElement);
-          const decoder = new TextDecoder();
+              if (text.startsWith(this.commandPrefix)) {
+                let decryptedUint8Array = XChaCha20_Poly1305.decode(text.substring(this.commandPrefix.length));
+                let decodedMessage = decoder.decode(decryptedUint8Array);
 
-          if (text.startsWith(this.commandPrefix)) {
-            let decryptedUint8Array = XChaCha20_Poly1305.decode(text.substring(this.commandPrefix.length));
-            let decodedMessage = decoder.decode(decryptedUint8Array);
+                let allSpanElements = messageContentElement.querySelectorAll("span");
+                allSpanElements.forEach((element) => {
+                  element.style.display = "none";
+                });
 
-            spanElement.innerHTML = "";
+                let firstSpanElement = document.createElement("span");
+                firstSpanElement.className = quantumClass;
+                firstSpanElement.style.color = "DeepSkyBlue";
+                firstSpanElement.textContent = this.commandPrefix;
+                messageContentElement.appendChild(firstSpanElement);
 
-            let firstSpanElement = document.createElement("span");
-            firstSpanElement.style.color = "DeepSkyBlue";
-            firstSpanElement.textContent = this.commandPrefix;
-            spanElement.appendChild(firstSpanElement);
+                let secondSpanElement = document.createElement("span");
+                secondSpanElement.className = quantumClass;
+                secondSpanElement.textContent = decodedMessage;
+                messageContentElement.appendChild(secondSpanElement);
+              }
+            },
+          })
+        );
+      }
+      // If the message is already decrypted, add button which shows the original message
+      else {
+        tree.props.children[2].props.children.splice(
+          4,
+          0,
+          ContextMenu.buildItem({
+            label: "Original anzeigen",
+            type: "text",
+            icon: () => {
+              return BdApi.React.createElement("img", {
+                src: "https://static.wikia.nocookie.net/among-us-wiki/images/1/16/Blue.png",
+                width: "auto",
+                height: "100%",
+              });
+            },
+            action: (e) => {
+              let allQuantumElements = messageContentElement.querySelectorAll("." + quantumClass);
+              allQuantumElements.forEach((element) => {
+                messageContentElement.removeChild(element);
+              });
 
-            let secondSpanElement = document.createElement("span");
-            secondSpanElement.textContent = decodedMessage;
-            secondSpanElement.id = "decrypted-message-" + this.messageId;
-            spanElement.appendChild(secondSpanElement);
-          }
-        },
-      })
-    );
+              let allSpanElements = messageContentElement.querySelectorAll("span");
+              allSpanElements.forEach((element) => {
+                element.removeAttribute("style");
+              });
+            },
+          })
+        );
+      }
+    }
   };
 }
