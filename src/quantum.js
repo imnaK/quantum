@@ -3,8 +3,12 @@ import secret from "./.secret.json";
 import stylesheet from "./stylesheet.css";
 
 import branca from "branca";
-
 const XChaCha20_Poly1305 = new branca(secret.key);
+
+import blueIcon from '../assets/images/Blue.png';
+import redIcon from '../assets/images/Red.png';
+
+
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
 export default class Quantum {
@@ -95,7 +99,7 @@ export default class Quantum {
     // Checks if it's a Quantum message
     if (text.startsWith(this.commandPrefix)) {
       const quantumClass = "quantum";
-      
+
       // Checks if the message is encrypted, then adds a decrypt button
       if (messageContentElement.querySelector("." + quantumClass) === null) {
         tree.props.children[2].props.children.splice(
@@ -106,7 +110,7 @@ export default class Quantum {
             type: "text",
             icon: () => {
               return BdApi.React.createElement("img", {
-                src: "https://static.wikia.nocookie.net/among-us-wiki/images/3/31/Red.png",
+                src: redIcon,
                 width: "auto",
                 height: "100%",
               });
@@ -148,7 +152,7 @@ export default class Quantum {
             type: "text",
             icon: () => {
               return BdApi.React.createElement("img", {
-                src: "https://static.wikia.nocookie.net/among-us-wiki/images/1/16/Blue.png",
+                src: blueIcon,
                 width: "auto",
                 height: "100%",
               });

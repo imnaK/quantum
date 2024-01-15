@@ -43,6 +43,17 @@ module.exports = {
     rules: [
       { test: /\.css$/, use: "raw-loader" },
       { test: /\.jsx$/, exclude: /node_modules/, use: "babel-loader" },
+      {
+        test: /\.(jpe?g|png|gif|svg)$/i,
+        use: [
+          {
+            loader: "url-loader",
+            options: {
+              limit: Infinity,
+            },
+          },
+        ],
+      },
     ],
   },
   plugins: [
@@ -52,12 +63,7 @@ module.exports = {
         compiler.hooks.assetEmitted.tap("copyPlugin2Dir", (filename, info) => {
           const userConfig = (() => {
             if (process.platform === "win32") return process.env.APPDATA;
-            if (process.platform === "darwin")
-              return path.join(
-                process.env.HOME,
-                "Library",
-                "Application Support"
-              );
+            if (process.platform === "darwin") return path.join(process.env.HOME, "Library", "Application Support");
             if (process.env.XDG_CONFIG_HOME) return process.env.XDG_CONFIG_HOME;
             return path.join(process.env.HOME, ".config");
           })();
