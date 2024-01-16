@@ -6,8 +6,6 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 const pkg = require("./package.json");
 const pluginConfig = require("./config.json");
-pluginConfig.version = pkg.version;
-pluginConfig.author = pkg.author.name;
 
 // color codes
 const ccGreen = "\u001b[1;32m";
@@ -17,6 +15,10 @@ const meta = (() => {
   const lines = ["/**"];
   for (const key in pluginConfig) {
     lines.push(` * @${key} ${pluginConfig[key]}`);
+    if (key === "description") {
+      lines.push(` * @version ${pkg.version}`);
+      lines.push(` * @author ${pkg.author.name}`);
+    }
   }
   lines.push(" */");
   return lines.join("\n");
