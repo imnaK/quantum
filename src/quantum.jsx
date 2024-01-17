@@ -5,8 +5,7 @@ import stylesheet from "./stylesheet.css";
 import branca from "branca";
 const XChaCha20_Poly1305 = new branca(secret.key);
 
-import blueIcon from '../assets/images/Blue.png';
-import redIcon from '../assets/images/Red.png';
+import quantumIcon from '../assets/images/quantum.svg';
 
 
 const { Patcher, Webpack, ContextMenu } = BdApi;
@@ -109,11 +108,7 @@ export default class Quantum {
             label: "Nachricht entschlüsseln",
             type: "text",
             icon: () => {
-              return BdApi.React.createElement("img", {
-                src: redIcon,
-                width: "auto",
-                height: "100%",
-              });
+              return <div className="quantum context-menu icon" dangerouslySetInnerHTML={{ __html: quantumIcon }} />;
             },
             action: (e) => {
               const decoder = new TextDecoder();
@@ -151,11 +146,7 @@ export default class Quantum {
             label: "Original anzeigen",
             type: "text",
             icon: () => {
-              return BdApi.React.createElement("img", {
-                src: blueIcon,
-                width: "auto",
-                height: "100%",
-              });
+              return <div className="quantum context-menu icon" dangerouslySetInnerHTML={{ __html: quantumIcon }} />;
             },
             action: (e) => {
               let allQuantumElements = messageContentElement.querySelectorAll("." + quantumClass);
