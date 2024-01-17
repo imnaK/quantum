@@ -34,8 +34,6 @@ export default class dataStructure {
       // Quantum.log([...this.#hashedPassword].map((x) => x.toString(16).padStart(2, "0")).join(""));
       this.load();
     });
-    
-
   }
 
   decrypt(encryptedData) {
@@ -85,25 +83,26 @@ export default class dataStructure {
 
   set(key, value) {
     this.#dataObject[key] = value;
+    this.save();
   }
-}
 
-function showPasswordModal(callback) {
-  const inputRef = BdApi.React.createRef();
+  showPasswordModal(callback) {
+    const inputRef = BdApi.React.createRef();
 
-  const handleConfirm = () => {
-    callback(inputRef.current.getValue());
-    BdApi.Webpack.getModule(BdApi.Webpack.Filters.byKeys("closeModal")).closeModal(modalId);
-  };
+    const handleConfirm = () => {
+      callback(inputRef.current.getValue());
+      BdApi.Webpack.getModule(BdApi.Webpack.Filters.byKeys("closeModal")).closeModal(modalId);
+    };
 
-  let modalId = BdApi.UI.showConfirmationModal(
-    "Quantum Password",
-    <InputField ref={inputRef} handleConfirm={handleConfirm} type="password" />,
-    {
-      confirmText: "Enter",
-      cancelText: "Nevermind",
-      onConfirm: handleConfirm,
-      onCancel: () => Quantum.log("Pressed 'Nevermind'"),
-    }
-  );
+    let modalId = BdApi.UI.showConfirmationModal(
+      "Quantum Password",
+      <InputField ref={inputRef} handleConfirm={handleConfirm} type="password" />,
+      {
+        confirmText: "Enter",
+        cancelText: "Nevermind",
+        onConfirm: handleConfirm,
+        onCancel: () => Quantum.log("Pressed 'Nevermind'"),
+      }
+    );
+  }
 }
