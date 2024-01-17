@@ -2,6 +2,7 @@ const webpack = require("webpack");
 const path = require("path");
 const fs = require("fs");
 const TerserPlugin = require("terser-webpack-plugin");
+const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 
 const pkg = require("./package.json");
 const pluginConfig = require("./config.json");
@@ -19,10 +20,8 @@ const meta = (() => {
   for (const key in pluginConfig) {
     lines.push(` * @${key} ${pluginConfig[key]}`);
     if (key === "description") {
-      if (pkg.version)
-      lines.push(` * @version ${pkg.version}`);
-    if (pkg.author && pkg.author.name)
-      lines.push(` * @author ${pkg.author.name}`);
+      if (pkg.version) lines.push(` * @version ${pkg.version}`);
+      if (pkg.author && pkg.author.name) lines.push(` * @author ${pkg.author.name}`);
     }
   }
   lines.push(" */");
@@ -72,6 +71,42 @@ module.exports = (env) => ({
           },
         },
       }),
+      new ImageMinimizerPlugin({
+        minimizer: {
+          implementation: ImageMinimizerPlugin.imageminMinify,
+          options: {
+            // Lossless optimization with custom option
+            // Feel free to experiment with options for better result for you
+            plugins: [
+              ["gifsicle", { interlaced: true }],
+              ["jpegtran", { progressive: true }],
+              ["optipng", { optimizationLevel: 5 }],
+              // Svgo configuration here https://github.com/svg/svgo#configuration
+              [
+                "svgo",
+                {
+                  plugins: [
+                    {
+                      name: "preset-default",
+                      params: {
+                        overrides: {
+                          removeViewBox: false,
+                          removeXMLNS: true,
+                          addAttributesToSVGElement: {
+                            params: {
+                              attributes: [{ xmlns: "http://www.w3.org/2000/svg" }],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            ],
+          },
+        },
+      }),
     ],
   },
   module: {
@@ -79,7 +114,11 @@ module.exports = (env) => ({
       { test: /\.css$/, exclude: /node_modules/, use: "raw-loader" },
       { test: /\.jsx$/, exclude: /node_modules/, use: "babel-loader" },
       {
-        test: /\.(jpe?g|png|gif|svg)$/i,
+        test: /\.svg$/,
+        use: "raw-loader",
+      },
+      {
+        test: /\.(jpe?g|png|gif)$/i,
         exclude: /node_modules/,
         use: [
           {
@@ -120,7 +159,9 @@ module.exports = (env) => ({
               filename +
               ccReset +
               ' to "' +
-              bdPluginFolder +  + pluginName + ".plugin.js" +
+              bdPluginFolder +
+              +pluginName +
+              ".plugin.js" +
               '" ' +
               ccGreen +
               "successfully" +
