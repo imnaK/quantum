@@ -18,7 +18,7 @@ export default class dataStructure {
         ? BdApi.Webpack.getModule(BdApi.Webpack.Filters.byKeys("getCurrentUser")).getCurrentUser().id
         : userId;
 
-    showPasswordModal(async (password) => {
+    this.showPasswordModal(async (password) => {
       Quantum.log("Hashing password...");
 
       const encoder = new TextEncoder();
