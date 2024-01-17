@@ -1,22 +1,27 @@
 const webpack = require("webpack");
 const path = require("path");
 const fs = require("fs");
-
 const TerserPlugin = require("terser-webpack-plugin");
 
 const pkg = require("./package.json");
 const pluginConfig = require("./config.json");
 
-// color codes
+// Color codes
 const ccGreen = "\u001b[1;32m";
 const ccReset = "\u001b[0m";
+
+// Plugin name and entry file
+const pluginName = "Quantum";
+const entryFile = "./src/quantum.jsx";
 
 const meta = (() => {
   const lines = ["/**"];
   for (const key in pluginConfig) {
     lines.push(` * @${key} ${pluginConfig[key]}`);
     if (key === "description") {
+      if (pkg.version)
       lines.push(` * @version ${pkg.version}`);
+    if (pkg.author && pkg.author.name)
       lines.push(` * @author ${pkg.author.name}`);
     }
   }
@@ -24,7 +29,7 @@ const meta = (() => {
   return lines.join("\n");
 })();
 
-module.exports = {
+module.exports = (env) => ({
   mode: "development",
   target: "node",
   devtool: false,
@@ -32,10 +37,12 @@ module.exports = {
   watchOptions: {
     ignored: /node_modules/,
   },
-  entry: {
-    Quantum: "./src/quantum.jsx",
-    "Quantum.min": "./src/quantum.jsx",
-  },
+  entry: env.production
+    ? {
+        [pluginName]: entryFile,
+        [pluginName + ".min"]: entryFile,
+      }
+    : { [pluginName]: entryFile },
   output: {
     filename: "[name].plugin.js",
     path: path.join(__dirname, "build"),
@@ -47,14 +54,13 @@ module.exports = {
     extensions: [".js", ".jsx", ".css"],
   },
   optimization: {
-    minimize: true,
+    minimize: env.production,
     minimizer: [
       new TerserPlugin({
         include: /\.min\.plugin\.js$/,
         extractComments: false,
         terserOptions: {
           output: {
-            //comments: /@name|@description|@version|@author|^!/,
             comments: (node, comment) => {
               const text = comment.value;
               const type = comment.type;
@@ -70,10 +76,11 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.css$/, use: "raw-loader" },
+      { test: /\.css$/, exclude: /node_modules/, use: "raw-loader" },
       { test: /\.jsx$/, exclude: /node_modules/, use: "babel-loader" },
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
+        exclude: /node_modules/,
         use: [
           {
             loader: "url-loader",
@@ -91,7 +98,7 @@ module.exports = {
       apply: (compiler) => {
         compiler.hooks.assetEmitted.tap("copyPlugin2Dir", (filename, info) => {
           // Only copy files that end with min.plugin.js
-          if (!filename.endsWith("min.plugin.js")) {
+          if (env.production ? !filename.endsWith("min.plugin.js") : filename.endsWith("min.plugin.js")) {
             return;
           }
 
@@ -101,16 +108,19 @@ module.exports = {
             if (process.env.XDG_CONFIG_HOME) return process.env.XDG_CONFIG_HOME;
             return path.join(process.env.HOME, ".config");
           })();
+
           const bdFolder = path.join(userConfig, "BetterDiscord");
-          const bdPluginFolder = path.join(bdFolder, "plugins", filename);
-          fs.copyFileSync(info.targetPath, bdPluginFolder);
+          const bdPluginFolder = path.join(bdFolder, "plugins/");
+
+          // Copy the plugin file to the plugin folder
+          fs.copyFileSync(info.targetPath, bdPluginFolder + pluginName + ".plugin.js");
           console.log(
             "\ncopied " +
               ccGreen +
               filename +
               ccReset +
               ' to "' +
-              bdPluginFolder +
+              bdPluginFolder +  + pluginName + ".plugin.js" +
               '" ' +
               ccGreen +
               "successfully" +
@@ -120,4 +130,4 @@ module.exports = {
       },
     },
   ],
-};
+});
