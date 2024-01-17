@@ -33,8 +33,8 @@ module.exports = {
     ignored: /node_modules/,
   },
   entry: {
-    Quantum: "./src/quantum.js",
-    "Quantum.min": "./src/quantum.js",
+    Quantum: "./src/quantum.jsx",
+    "Quantum.min": "./src/quantum.jsx",
   },
   output: {
     filename: "[name].plugin.js",
