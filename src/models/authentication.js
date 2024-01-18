@@ -1,6 +1,6 @@
 import * as nacl from "tweetnacl";
 import * as naclUtil from "tweetnacl-util";
-import Quantum from "./quantum";
+import Quantum from "@quantum";
 
 export default class authentication {
   constructor() {
