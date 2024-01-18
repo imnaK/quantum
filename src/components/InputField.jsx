@@ -1,3 +1,6 @@
+import { classNames } from "@utils";
+import { QUANTUM_CLASS } from "@utils/constants";
+
 export default BdApi.React.forwardRef((props, ref) => {
   const inputRef = BdApi.React.useRef();
 
@@ -12,7 +15,7 @@ export default BdApi.React.forwardRef((props, ref) => {
   return (
     <input
       type={props.type || "text"}
-      className="quantum inputField"
+      className={classNames(QUANTUM_CLASS, "inputField")}
       placeholder={props.placeholder || ""}
       onKeyDown={handleKeyDown}
       ref={inputRef}
