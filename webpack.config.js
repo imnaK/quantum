@@ -65,7 +65,12 @@ module.exports = (env) => ({
               const type = comment.type;
               if (type == "comment2") {
                 // multiline comment
-                return /@name/.test(text) && /@description/.test(text) && /@version/.test(text) && /@author/.test(text);
+                return (
+                  /@name/.test(text) &&
+                  /@description/.test(text) &&
+                  /@version/.test(text) &&
+                  /@author/.test(text)
+                );
               }
             },
           },
@@ -78,9 +83,6 @@ module.exports = (env) => ({
             // Lossless optimization with custom option
             // Feel free to experiment with options for better result for you
             plugins: [
-              ["gifsicle", { interlaced: true }],
-              ["jpegtran", { progressive: true }],
-              ["optipng", { optimizationLevel: 5 }],
               // Svgo configuration here https://github.com/svg/svgo#configuration
               [
                 "svgo",
@@ -137,13 +139,18 @@ module.exports = (env) => ({
       apply: (compiler) => {
         compiler.hooks.assetEmitted.tap("copyPlugin2Dir", (filename, info) => {
           // Only copy files that end with min.plugin.js
-          if (env.production ? !filename.endsWith("min.plugin.js") : filename.endsWith("min.plugin.js")) {
+          if (
+            env.production
+              ? !filename.endsWith("min.plugin.js")
+              : filename.endsWith("min.plugin.js")
+          ) {
             return;
           }
 
           const userConfig = (() => {
             if (process.platform === "win32") return process.env.APPDATA;
-            if (process.platform === "darwin") return path.join(process.env.HOME, "Library", "Application Support");
+            if (process.platform === "darwin")
+              return path.join(process.env.HOME, "Library", "Application Support");
             if (process.env.XDG_CONFIG_HOME) return process.env.XDG_CONFIG_HOME;
             return path.join(process.env.HOME, ".config");
           })();
