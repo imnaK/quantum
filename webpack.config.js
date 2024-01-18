@@ -21,7 +21,8 @@ const meta = (() => {
     lines.push(` * @${key} ${pluginConfig[key]}`);
     if (key === "description") {
       if (pkg.version) lines.push(` * @version ${pkg.version}`);
-      if (pkg.author && pkg.author.name) lines.push(` * @author ${pkg.author.name}`);
+      if (pkg.author && pkg.author.name)
+        lines.push(` * @author ${pkg.author.name}`);
     }
   }
   lines.push(" */");
@@ -51,6 +52,13 @@ module.exports = (env) => ({
   },
   resolve: {
     extensions: [".js", ".jsx", ".css"],
+    alias: {
+      "@assets": path.resolve(__dirname, "assets/"),
+      "@components": path.resolve(__dirname, "src/components/"),
+      "@services": path.resolve(__dirname, "src/services/"),
+      "@models": path.resolve(__dirname, "src/models/"),
+      "@utils": path.resolve(__dirname, "src/utils/"),
+    },
   },
   optimization: {
     minimize: env.production,
@@ -65,7 +73,12 @@ module.exports = (env) => ({
               const type = comment.type;
               if (type == "comment2") {
                 // multiline comment
-                return /@name/.test(text) && /@description/.test(text) && /@version/.test(text) && /@author/.test(text);
+                return (
+                  /@name/.test(text) &&
+                  /@description/.test(text) &&
+                  /@version/.test(text) &&
+                  /@author/.test(text)
+                );
               }
             },
           },
@@ -94,7 +107,9 @@ module.exports = (env) => ({
                           removeXMLNS: true,
                           addAttributesToSVGElement: {
                             params: {
-                              attributes: [{ xmlns: "http://www.w3.org/2000/svg" }],
+                              attributes: [
+                                { xmlns: "http://www.w3.org/2000/svg" },
+                              ],
                             },
                           },
                         },
@@ -137,13 +152,22 @@ module.exports = (env) => ({
       apply: (compiler) => {
         compiler.hooks.assetEmitted.tap("copyPlugin2Dir", (filename, info) => {
           // Only copy files that end with min.plugin.js
-          if (env.production ? !filename.endsWith("min.plugin.js") : filename.endsWith("min.plugin.js")) {
+          if (
+            env.production
+              ? !filename.endsWith("min.plugin.js")
+              : filename.endsWith("min.plugin.js")
+          ) {
             return;
           }
 
           const userConfig = (() => {
             if (process.platform === "win32") return process.env.APPDATA;
-            if (process.platform === "darwin") return path.join(process.env.HOME, "Library", "Application Support");
+            if (process.platform === "darwin")
+              return path.join(
+                process.env.HOME,
+                "Library",
+                "Application Support"
+              );
             if (process.env.XDG_CONFIG_HOME) return process.env.XDG_CONFIG_HOME;
             return path.join(process.env.HOME, ".config");
           })();
@@ -152,7 +176,10 @@ module.exports = (env) => ({
           const bdPluginFolder = path.join(bdFolder, "plugins/");
 
           // Copy the plugin file to the plugin folder
-          fs.copyFileSync(info.targetPath, bdPluginFolder + pluginName + ".plugin.js");
+          fs.copyFileSync(
+            info.targetPath,
+            bdPluginFolder + pluginName + ".plugin.js"
+          );
           console.log(
             "\ncopied " +
               ccGreen +
