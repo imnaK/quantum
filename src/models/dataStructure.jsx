@@ -14,8 +14,9 @@ export default class dataStructure {
   constructor(userId) {
     this.userId =
       userId == null
-        ? BdApi.Webpack.getModule(BdApi.Webpack.Filters.byKeys("getCurrentUser")).getCurrentUser()
-            .id
+        ? BdApi.Webpack.getModule(
+            BdApi.Webpack.Filters.byKeys("getCurrentUser")
+          ).getCurrentUser().id
         : userId;
 
     this.showPasswordModal(async (password) => {
@@ -56,7 +57,9 @@ export default class dataStructure {
 
   load() {
     try {
-      let encryptedData = fs.readFileSync(dataDirectory + "data_" + this.userId);
+      let encryptedData = fs.readFileSync(
+        dataDirectory + "data_" + this.userId
+      );
       let decryptedJsonData = this.decrypt(encryptedData);
       this.dataObject = JSON.parse(decryptedJsonData);
 
@@ -103,12 +106,18 @@ export default class dataStructure {
 
     const handleConfirm = () => {
       callback(inputRef.current.getValue());
-      BdApi.Webpack.getModule(BdApi.Webpack.Filters.byKeys("closeModal")).closeModal(modalId);
+      BdApi.Webpack.getModule(
+        BdApi.Webpack.Filters.byKeys("closeModal")
+      ).closeModal(modalId);
     };
 
     let modalId = BdApi.UI.showConfirmationModal(
       "Quantum Password",
-      <InputField ref={inputRef} handleConfirm={handleConfirm} type="password" />,
+      <InputField
+        ref={inputRef}
+        handleConfirm={handleConfirm}
+        type="password"
+      />,
       {
         confirmText: "Enter",
         cancelText: "Nevermind",

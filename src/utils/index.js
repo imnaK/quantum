@@ -2,7 +2,9 @@ import contextIcon from "@components/ContextIcon";
 
 export function getAllTextOfElement(element) {
   const children = Array.from(element.querySelectorAll("*"));
-  const text = children.map((child) => child.textContent.replace(/\s/g, "")).join("");
+  const text = children
+    .map((child) => child.textContent.replace(/\s/g, ""))
+    .join("");
   return text;
 }
 

@@ -1,5 +1,10 @@
 import dataStructure from "@models/dataStructure";
-import { getAllTextOfElement, createContextMenu, modifyElements, createSpan } from "@utils";
+import {
+  getAllTextOfElement,
+  createContextMenu,
+  modifyElements,
+  createSpan,
+} from "@utils";
 import { encryptMessage, decryptMessage } from "@services/encryption";
 import * as logger from "@utils/logger";
 import mainStyles from "@assets/styles/main.css";
@@ -29,22 +34,39 @@ export default class Quantum {
   }
 
   patchSendMessage() {
-    const _sendMessageModule = Webpack.getModule(Webpack.Filters.byKeys("_sendMessage"));
+    const _sendMessageModule = Webpack.getModule(
+      Webpack.Filters.byKeys("_sendMessage")
+    );
 
-    BdApi.Patcher.before("encryptMessage", _sendMessageModule, "sendMessage", (...args) =>
-      this.handleMessageSend(...args)
+    BdApi.Patcher.before(
+      "encryptMessage",
+      _sendMessageModule,
+      "sendMessage",
+      (...args) => this.handleMessageSend(...args)
     );
   }
 
   patchSwitchAccount() {
-    const switchAccountModule = Webpack.getModule(Webpack.Filters.byKeys("switchAccount"));
+    const switchAccountModule = Webpack.getModule(
+      Webpack.Filters.byKeys("switchAccount")
+    );
 
-    Patcher.after("switchAccount", switchAccountModule, "switchAccount", (_, args) => {
-      logger.log("Last User ID: ", this.data.userId, "\nSwitched User ID to: ", args[0]);
-      if (this.data.userId !== args[0]) {
-        this.data = new dataStructure(args[0]);
+    Patcher.after(
+      "switchAccount",
+      switchAccountModule,
+      "switchAccount",
+      (_, args) => {
+        logger.log(
+          "Last User ID: ",
+          this.data.userId,
+          "\nSwitched User ID to: ",
+          args[0]
+        );
+        if (this.data.userId !== args[0]) {
+          this.data = new dataStructure(args[0]);
+        }
       }
-    });
+    );
   }
 
   patchMessageContextMenu() {
@@ -57,19 +79,25 @@ export default class Quantum {
   // Encrypt message before sending
   handleMessageSend(_, args) {
     const message = args[1].content;
-    if (message.startsWith(QUANTUM_PREFIX)) args[1].content = encryptMessage(message);
+    if (message.startsWith(QUANTUM_PREFIX))
+      args[1].content = encryptMessage(message);
   }
 
   // Create and append decrypt button to message context menu
   contextMenuCallback = (tree, d) => {
-    const messageElement = document.querySelector("#message-content-" + d.message.id);
+    const messageElement = document.querySelector(
+      "#message-content-" + d.message.id
+    );
     const messageContent = getAllTextOfElement(messageElement);
 
     // Checks if it's a Quantum message
     if (messageContent.startsWith(QUANTUM_PREFIX)) {
       // Checks if the message is encrypted, then adds a decrypt button
       if (messageElement.querySelector(`.${QUANTUM_CLASS}`) === null) {
-        const performDecryptAction = decryptAction(messageElement, messageContent);
+        const performDecryptAction = decryptAction(
+          messageElement,
+          messageContent
+        );
         const decryptItem = createContextMenu(
           ContextMenu,
           "Nachricht entschlüsseln",

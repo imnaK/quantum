@@ -21,7 +21,8 @@ const meta = (() => {
     lines.push(` * @${key} ${pluginConfig[key]}`);
     if (key === "description") {
       if (pkg.version) lines.push(` * @version ${pkg.version}`);
-      if (pkg.author && pkg.author.name) lines.push(` * @author ${pkg.author.name}`);
+      if (pkg.author && pkg.author.name)
+        lines.push(` * @author ${pkg.author.name}`);
     }
   }
   lines.push(" */");
@@ -103,7 +104,9 @@ module.exports = (env) => ({
                           removeXMLNS: true,
                           addAttributesToSVGElement: {
                             params: {
-                              attributes: [{ xmlns: "http://www.w3.org/2000/svg" }],
+                              attributes: [
+                                { xmlns: "http://www.w3.org/2000/svg" },
+                              ],
                             },
                           },
                         },
@@ -157,7 +160,11 @@ module.exports = (env) => ({
           const userConfig = (() => {
             if (process.platform === "win32") return process.env.APPDATA;
             if (process.platform === "darwin")
-              return path.join(process.env.HOME, "Library", "Application Support");
+              return path.join(
+                process.env.HOME,
+                "Library",
+                "Application Support"
+              );
             if (process.env.XDG_CONFIG_HOME) return process.env.XDG_CONFIG_HOME;
             return path.join(process.env.HOME, ".config");
           })();
@@ -166,7 +173,10 @@ module.exports = (env) => ({
           const bdPluginFolder = path.join(bdFolder, "plugins/");
 
           // Copy the plugin file to the plugin folder
-          fs.copyFileSync(info.targetPath, bdPluginFolder + pluginName + ".plugin.js");
+          fs.copyFileSync(
+            info.targetPath,
+            bdPluginFolder + pluginName + ".plugin.js"
+          );
           console.log(
             "\ncopied " +
               ccGreen +

@@ -52,14 +52,13 @@ export default class authentication {
   }
 
   sendChatMessage(content, channelId) {
-    Webpack.getModule(Webpack.Filters.byKeys("sendMessage", "sendBotMessage")).sendMessage(
-      channelId,
-      {
-        content: content,
-        invalidEmojis: [],
-        tts: false,
-        validNonShortcutEmojis: [],
-      }
-    );
+    Webpack.getModule(
+      Webpack.Filters.byKeys("sendMessage", "sendBotMessage")
+    ).sendMessage(channelId, {
+      content: content,
+      invalidEmojis: [],
+      tts: false,
+      validNonShortcutEmojis: [],
+    });
   }
 }

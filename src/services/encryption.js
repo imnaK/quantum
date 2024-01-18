@@ -17,7 +17,9 @@ export function encryptMessage(message) {
 
 export function decryptMessage(message) {
   const decoder = new TextDecoder();
-  const decryptedUint8Array = XChaCha20_Poly1305.decode(message.substring(QUANTUM_PREFIX.length));
+  const decryptedUint8Array = XChaCha20_Poly1305.decode(
+    message.substring(QUANTUM_PREFIX.length)
+  );
   const decodedMessage = decoder.decode(decryptedUint8Array);
   return decodedMessage;
 }
