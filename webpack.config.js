@@ -51,6 +51,13 @@ module.exports = (env) => ({
   },
   resolve: {
     extensions: [".js", ".jsx", ".css"],
+    alias: {
+      "@assets": path.resolve(__dirname, "assets/"),
+      "@components": path.resolve(__dirname, "src/components/"),
+      "@services": path.resolve(__dirname, "src/services/"),
+      "@models": path.resolve(__dirname, "src/models/"),
+      "@utils": path.resolve(__dirname, "src/utils/"),
+    },
   },
   optimization: {
     minimize: env.production,

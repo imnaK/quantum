@@ -9,12 +9,7 @@
   border: none;
 }
 
-.quantum.context-menu.icon {
-  width: auto;
-  height: 100%;
-}
-
-.quantum.context-menu.icon svg {
-  width: inherit;
-  height: inherit;
+.quantum.icon svg {
+  width: 18px;
+  height: 18px;
 }

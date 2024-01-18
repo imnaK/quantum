@@ -1,9 +1,8 @@
-import Quantum from "./quantum";
-import InputField from "./inputField";
-
 import * as fs from "fs";
 import branca from "branca";
 import * as scryptJs from "scrypt-js";
+import * as logger from "@utils/logger";
+import InputField from "@components/InputField";
 
 const dataDirectory = __dirname + "/../quantum/";
 
@@ -15,11 +14,12 @@ export default class dataStructure {
   constructor(userId) {
     this.userId =
       userId == null
-        ? BdApi.Webpack.getModule(BdApi.Webpack.Filters.byKeys("getCurrentUser")).getCurrentUser().id
+        ? BdApi.Webpack.getModule(BdApi.Webpack.Filters.byKeys("getCurrentUser")).getCurrentUser()
+            .id
         : userId;
 
     this.showPasswordModal(async (password) => {
-      Quantum.log("Hashing password...");
+      logger.log("Hashing password...");
 
       const encoder = new TextEncoder();
       let passwordUint8Array = encoder.encode(password);
@@ -28,10 +28,18 @@ export default class dataStructure {
         r = 8,
         p = 1,
         dkLen = 32;
-      this.#hashedPassword = await scryptJs.scrypt(passwordUint8Array, userIdUint8Array, N, r, p, dkLen, (progress) => {
-        console.log(Math.trunc(100 * progress) + "%");
-      });
-      // Quantum.log([...this.#hashedPassword].map((x) => x.toString(16).padStart(2, "0")).join(""));
+      this.#hashedPassword = await scryptJs.scrypt(
+        passwordUint8Array,
+        userIdUint8Array,
+        N,
+        r,
+        p,
+        dkLen,
+        (progress) => {
+          console.log(Math.trunc(100 * progress) + "%");
+        }
+      );
+      // logger.log([...this.#hashedPassword].map((x) => x.toString(16).padStart(2, "0")).join(""));
       this.load();
     });
   }
@@ -54,7 +62,7 @@ export default class dataStructure {
 
       console.log("Loaded & decrypted data object: ", dataObject);
     } catch (error) {
-      Quantum.error(error);
+      logger.error(error);
       return -1;
     }
   }
@@ -63,18 +71,22 @@ export default class dataStructure {
     let jsonData = JSON.stringify(this.#dataObject);
 
     let encryptedData = this.encrypt(jsonData);
-    Quantum.log("Encrypted data: ", encryptedData);
+    logger.log("Encrypted data: ", encryptedData);
 
     if (!fs.existsSync(dataDirectory)) {
       fs.mkdirSync(dataDirectory, { recursive: true });
     }
-    fs.writeFile(dataDirectory + "data_" + this.userId, Buffer.from(encryptedData), function (error) {
-      if (error) {
-        Quantum.error(error);
-        return -1;
+    fs.writeFile(
+      dataDirectory + "data_" + this.userId,
+      Buffer.from(encryptedData),
+      function (error) {
+        if (error) {
+          logger.error(error);
+          return -1;
+        }
+        logger.log("Saved data to file");
       }
-      Quantum.log("Saved data to file");
-    });
+    );
   }
 
   get(key) {
@@ -101,7 +113,7 @@ export default class dataStructure {
         confirmText: "Enter",
         cancelText: "Nevermind",
         onConfirm: handleConfirm,
-        onCancel: () => Quantum.log("Pressed 'Nevermind'"),
+        onCancel: () => logger.log("Pressed 'Nevermind'"),
       }
     );
   }

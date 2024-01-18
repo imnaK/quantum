@@ -41,7 +41,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --progress --color",
     "build:production": "webpack --env production --progress --color",
-    "pretty": "prettier --write \"./*.{js,jsx,json,css}\""
+    "pretty": "prettier --write \"./**/*.{js,jsx,json,css}\""
   },
   "private": true,
   "dependencies": {
