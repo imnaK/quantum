@@ -169,13 +169,13 @@ module.exports = (env) => ({
             return path.join(process.env.HOME, ".config");
           })();
 
-          const bdFolder = path.join(userConfig, "BetterDiscord");
-          const bdPluginFolder = path.join(bdFolder, "plugins/");
+          const bdPluginFolder = path.join(userConfig, "BetterDiscord", "plugins");
+          const filePath = path.join(bdPluginFolder, pluginName + ".plugin.js");
 
           // Copy the plugin file to the plugin folder
           fs.copyFileSync(
             info.targetPath,
-            bdPluginFolder + pluginName + ".plugin.js"
+            filePath
           );
           console.log(
             "\ncopied " +
@@ -183,9 +183,7 @@ module.exports = (env) => ({
               filename +
               ccReset +
               ' to "' +
-              bdPluginFolder +
-              +pluginName +
-              ".plugin.js" +
+              filePath +
               '" ' +
               ccGreen +
               "successfully" +
