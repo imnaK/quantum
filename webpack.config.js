@@ -58,6 +58,7 @@ module.exports = (env) => ({
       "@services": path.resolve(__dirname, "src/services/"),
       "@models": path.resolve(__dirname, "src/models/"),
       "@utils": path.resolve(__dirname, "src/utils/"),
+      "@quantum": path.resolve(__dirname, "src/quantum"),
     },
   },
   optimization: {
