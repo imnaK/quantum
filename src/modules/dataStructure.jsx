@@ -3,6 +3,7 @@ import branca from "branca";
 import * as scryptJs from "scrypt-js";
 import * as log4q from "@utils/log4q";
 import InputField from "@components/InputField";
+import Meta from "@meta";
 
 const dataDirectory = __dirname + "/../quantum/";
 
@@ -12,8 +13,7 @@ export default class dataStructure {
   userId = null;
   pluginName = null;
 
-  constructor(pluginName, userId) {
-    this.pluginName = pluginName;
+  constructor(userId) {
     this.userId =
       userId == null
         ? BdApi.Webpack.getModule(
@@ -120,7 +120,7 @@ export default class dataStructure {
       ).closeModal(modalId);
 
       // disable this plugin
-      BdApi.Plugins.disable(this.pluginName);
+      BdApi.Plugins.disable(Meta.name);
     }
 
     let modalId = BdApi.UI.showConfirmationModal(

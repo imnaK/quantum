@@ -9,6 +9,7 @@ import { encryptMessage, decryptMessage } from "@modules/encryption";
 import * as log4q from "@utils/log4q";
 import mainStyles from "@assets/styles/main.css";
 import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
+import Meta from "@meta";
 
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
@@ -16,12 +17,12 @@ export default class Quantum {
   data = null;
 
   constructor(meta) {
-    this.meta = meta;
+    Object.assign(Meta, meta);
   }
 
   start() {
-    // this.data = new dataStructure(this.meta.name);
-    BdApi.DOM.addStyle(this.meta.name, mainStyles);
+    this.data = new dataStructure();
+    BdApi.DOM.addStyle(Meta.name, mainStyles);
     this.patchSendMessage();
     this.patchSwitchAccount();
     this.patchMessageContextMenu();
@@ -30,7 +31,7 @@ export default class Quantum {
   stop() {
     Patcher.unpatchAll("encryptMessage");
     this.unpatchMessageContextMenu();
-    BdApi.DOM.removeStyle(this.meta.name);
+    BdApi.DOM.removeStyle(Meta.name);
   }
 
   patchSendMessage() {
@@ -63,7 +64,7 @@ export default class Quantum {
           args[0]
         );
         if (this.data.userId !== args[0]) {
-          this.data = new dataStructure(this.meta.name, args[0]);
+          this.data = new dataStructure(args[0]);
         }
       }
     );
