@@ -13,8 +13,6 @@ const dataDirectory = __dirname + "/../quantum/";
 export default class dataStructure {
   #hashedPassword = null;
   #dataObject = {};
-  userId = null;
-  pluginName = null;
 
   constructor(pluginName, userId) {
     this.pluginName = pluginName;
