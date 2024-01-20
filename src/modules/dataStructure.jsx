@@ -7,6 +7,8 @@ import { classNames } from "@utils";
 import { QUANTUM_CLASS } from "@utils/constants";
 import Meta from "@meta";
 
+const { React } = BdApi;
+
 const dataDirectory = __dirname + "/../quantum/";
 
 export default class dataStructure {
@@ -107,33 +109,42 @@ export default class dataStructure {
     this.save();
   }
 
-  showPasswordModal(callback) {
+  showPasswordModal(
+    callback,
+    schinken // I asked how i should name this parameter and the answer was schinken. ¯\_(ツ)_/¯
+  ) {
     const inputRef = BdApi.React.createRef();
+    const closeModule = BdApi.Webpack.getModule(
+      BdApi.Webpack.Filters.byKeys("closeModal")
+    );
 
     const handleConfirm = () => {
       callback(inputRef.current.getValue());
-      BdApi.Webpack.getModule(
-        BdApi.Webpack.Filters.byKeys("closeModal")
-      ).closeModal(modalId);
+
+      // Close modal
+      closeModule.closeModal(modalId);
     };
 
     const handleCancel = () => {
-      // close modal
-      BdApi.Webpack.getModule(
-        BdApi.Webpack.Filters.byKeys("closeModal")
-      ).closeModal(modalId);
+      // Close modal
+      closeModule.closeModal(modalId);
 
       // disable this plugin
       BdApi.Plugins.disable(Meta.name);
     }
 
     let modalId = BdApi.UI.showConfirmationModal(
-      "Quantum Password",
+      "Quantum Password", // Try BdApi.React.Fragment
+      <React.Fragment>
+        <span className={classNames(QUANTUM_CLASS, "inputErrorText")}>
+          {schinken || ""}
+        </span>
         <InputField
           ref={inputRef}
           handleConfirm={handleConfirm}
           type="password"
-      />,
+        />
+      </React.Fragment>,
       {
         confirmText: "Enter",
         cancelText: "Nevermind",
