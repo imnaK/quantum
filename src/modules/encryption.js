@@ -1,5 +1,5 @@
 import branca from "branca";
-import * as logger from "@utils/logger";
+import * as log4q from "@utils/log4q";
 import { QUANTUM_PREFIX } from "@utils/constants";
 import secret from "/.secret.json";
 
@@ -11,7 +11,7 @@ export function encryptMessage(message) {
     const encryptedMessage = XChaCha20_Poly1305.encode(messageWithoutPrefix);
     return QUANTUM_PREFIX + encryptedMessage;
   } catch (e) {
-    logger.error(e);
+    log4q.error(e);
   }
 }
 

@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import branca from "branca";
 import * as scryptJs from "scrypt-js";
-import * as logger from "@utils/logger";
+import * as log4q from "@utils/log4q";
 import InputField from "@components/InputField";
 
 const dataDirectory = __dirname + "/../quantum/";
@@ -22,7 +22,7 @@ export default class dataStructure {
         : userId;
 
     this.showPasswordModal(async (password) => {
-      logger.log("Hashing password...");
+      log4q.log("Hashing password...");
 
       const encoder = new TextEncoder();
       let passwordUint8Array = encoder.encode(password);
@@ -42,7 +42,7 @@ export default class dataStructure {
           console.log(Math.trunc(100 * progress) + "%");
         }
       );
-      // logger.log([...this.#hashedPassword].map((x) => x.toString(16).padStart(2, "0")).join(""));
+      // log4q.log([...this.#hashedPassword].map((x) => x.toString(16).padStart(2, "0")).join(""));
       this.load();
     });
   }
@@ -67,7 +67,7 @@ export default class dataStructure {
 
       console.log("Loaded & decrypted data object: ", dataObject);
     } catch (error) {
-      logger.error(error);
+      log4q.error(error);
       return -1;
     }
   }
@@ -76,7 +76,7 @@ export default class dataStructure {
     let jsonData = JSON.stringify(this.#dataObject);
 
     let encryptedData = this.encrypt(jsonData);
-    logger.log("Encrypted data: ", encryptedData);
+    log4q.log("Encrypted data: ", encryptedData);
 
     if (!fs.existsSync(dataDirectory)) {
       fs.mkdirSync(dataDirectory, { recursive: true });
@@ -86,10 +86,10 @@ export default class dataStructure {
       Buffer.from(encryptedData),
       function (error) {
         if (error) {
-          logger.error(error);
+          log4q.error(error);
           return -1;
         }
-        logger.log("Saved data to file");
+        log4q.log("Saved data to file");
       }
     );
   }

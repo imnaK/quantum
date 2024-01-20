@@ -1,11 +1,11 @@
 import * as nacl from "tweetnacl";
 import * as naclUtil from "tweetnacl-util";
 import Quantum from "@quantum";
-import * as logger from "@utils/logger";
+import * as log4q from "@utils/log4q";
 
 export default class authentication {
   constructor() {
-    logger.log(Quantum.data.getKey("keyPair"));
+    log4q.log(Quantum.data.getKey("keyPair"));
     //Quantum.log("Quantum.data.getKey(\"keyPair\")", Quantum.data.getKey("keyPair") || nacl.box.keyPair());
     // if (this.keyPair = Quantum.data.getKey("keyPair") == undefined) {
     //   this.keyPair = nacl.box.keyPair();

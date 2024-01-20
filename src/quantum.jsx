@@ -6,7 +6,7 @@ import {
   createSpan,
 } from "@utils";
 import { encryptMessage, decryptMessage } from "@modules/encryption";
-import * as logger from "@utils/logger";
+import * as log4q from "@utils/log4q";
 import mainStyles from "@assets/styles/main.css";
 import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
 
@@ -56,7 +56,7 @@ export default class Quantum {
       switchAccountModule,
       "switchAccount",
       (_, args) => {
-        logger.log(
+        log4q.log(
           "Last User ID: ",
           this.data.userId,
           "\nSwitched User ID to: ",
