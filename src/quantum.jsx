@@ -20,7 +20,7 @@ export default class Quantum {
   }
 
   start() {
-    // this.data = new dataStructure();
+    // this.data = new dataStructure(this.meta.name);
     BdApi.DOM.addStyle(this.meta.name, mainStyles);
     this.patchSendMessage();
     this.patchSwitchAccount();
@@ -63,7 +63,7 @@ export default class Quantum {
           args[0]
         );
         if (this.data.userId !== args[0]) {
-          this.data = new dataStructure(args[0]);
+          this.data = new dataStructure(this.meta.name, args[0]);
         }
       }
     );

@@ -10,8 +10,10 @@ export default class dataStructure {
   #hashedPassword = null;
   #dataObject = {};
   userId = null;
+  pluginName = null;
 
-  constructor(userId) {
+  constructor(pluginName, userId) {
+    this.pluginName = pluginName;
     this.userId =
       userId == null
         ? BdApi.Webpack.getModule(
@@ -111,6 +113,16 @@ export default class dataStructure {
       ).closeModal(modalId);
     };
 
+    const handleCancel = () => {
+      // close modal
+      BdApi.Webpack.getModule(
+        BdApi.Webpack.Filters.byKeys("closeModal")
+      ).closeModal(modalId);
+
+      // disable this plugin
+      BdApi.Plugins.disable(this.pluginName);
+    }
+
     let modalId = BdApi.UI.showConfirmationModal(
       "Quantum Password",
       <InputField
@@ -122,7 +134,7 @@ export default class dataStructure {
         confirmText: "Enter",
         cancelText: "Nevermind",
         onConfirm: handleConfirm,
-        onCancel: () => logger.log("Pressed 'Nevermind'"),
+        onCancel: handleCancel,
       }
     );
   }
