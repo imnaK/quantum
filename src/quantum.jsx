@@ -19,7 +19,6 @@ export default class Quantum {
 
   constructor(meta) {
     Object.assign(Meta, meta);
-    this.localeManager = BdApi.Webpack.getModule(m => m.Messages && Object.keys(m.Messages).length);
   }
 
   start() {
