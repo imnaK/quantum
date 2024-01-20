@@ -59,6 +59,7 @@ module.exports = (env) => ({
       "@utils": path.resolve(__dirname, "src/utils/"),
       "@quantum": path.resolve(__dirname, "src/quantum"),
       '@meta': path.resolve(__dirname, 'src/utils/meta'),
+      '@i18n': path.resolve(__dirname, 'src/i18n/i18n'),
     },
   },
   optimization: {

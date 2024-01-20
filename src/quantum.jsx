@@ -10,6 +10,7 @@ import * as log4q from "@utils/log4q";
 import mainStyles from "@assets/styles/main.css";
 import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
 import Meta from "@meta";
+import { init as i18nInit, cleanup as i18nCleanup, translate as t } from "@i18n";
 
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
@@ -18,11 +19,13 @@ export default class Quantum {
 
   constructor(meta) {
     Object.assign(Meta, meta);
+    this.localeManager = BdApi.Webpack.getModule(m => m.Messages && Object.keys(m.Messages).length);
   }
 
   start() {
     this.data = new dataStructure();
     BdApi.DOM.addStyle(Meta.name, mainStyles);
+    i18nInit();
     this.patchSendMessage();
     this.patchSwitchAccount();
     this.patchMessageContextMenu();
@@ -30,6 +33,7 @@ export default class Quantum {
 
   stop() {
     Patcher.unpatchAll("encryptMessage");
+    i18nCleanup();
     this.unpatchMessageContextMenu();
     BdApi.DOM.removeStyle(Meta.name);
   }
@@ -101,7 +105,7 @@ export default class Quantum {
         );
         const decryptItem = createContextMenu(
           ContextMenu,
-          "Nachricht entschlüsseln",
+          t("decrypt_message"),
           performDecryptAction
         );
         insertIntoTree(tree, 4, decryptItem);
@@ -111,7 +115,7 @@ export default class Quantum {
         const performOriginalAction = originalAction(messageElement);
         const originalItem = createContextMenu(
           ContextMenu,
-          "Original anzeigen",
+          t("show_original"),
           performOriginalAction
         );
         insertIntoTree(tree, 4, originalItem);
