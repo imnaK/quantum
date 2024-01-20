@@ -55,8 +55,7 @@ module.exports = (env) => ({
     alias: {
       "@assets": path.resolve(__dirname, "assets/"),
       "@components": path.resolve(__dirname, "src/components/"),
-      "@services": path.resolve(__dirname, "src/services/"),
-      "@models": path.resolve(__dirname, "src/models/"),
+      "@modules": path.resolve(__dirname, "src/modules/"),
       "@utils": path.resolve(__dirname, "src/utils/"),
       "@quantum": path.resolve(__dirname, "src/quantum"),
     },
