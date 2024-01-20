@@ -85,8 +85,8 @@ export default class Quantum {
 
   // Create and append decrypt button to message context menu
   contextMenuCallback = (tree, d) => {
-    const messageElement = document.querySelector(
-      "#message-content-" + d.message.id
+    const messageElement = document.getElementById(
+      "message-content-" + d.message.id
     );
     const messageContent = getAllTextOfElement(messageElement);
 
