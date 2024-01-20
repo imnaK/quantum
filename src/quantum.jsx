@@ -1,11 +1,11 @@
-import dataStructure from "@models/dataStructure";
+import dataStructure from "@modules/dataStructure";
 import {
   getAllTextOfElement,
   createContextMenu,
   modifyElements,
   createSpan,
 } from "@utils";
-import { encryptMessage, decryptMessage } from "@services/encryption";
+import { encryptMessage, decryptMessage } from "@modules/encryption";
 import * as logger from "@utils/logger";
 import mainStyles from "@assets/styles/main.css";
 import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
