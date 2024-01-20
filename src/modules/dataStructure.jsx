@@ -5,6 +5,7 @@ import * as log4q from "@utils/log4q";
 import InputField from "@components/InputField";
 import { classNames } from "@utils";
 import { QUANTUM_CLASS } from "@utils/constants";
+import Meta from "@meta";
 
 const { React } = BdApi;
 
@@ -14,8 +15,7 @@ export default class dataStructure {
   #hashedPassword = null;
   #dataObject = {};
 
-  constructor(pluginName, userId) {
-    this.pluginName = pluginName;
+  constructor(userId) {
     this.userId =
       userId == null
         ? BdApi.Webpack.getModule(
@@ -127,9 +127,9 @@ export default class dataStructure {
       // Close modal
       closeModule.closeModal(modalId);
 
-      // Disable this plugin
-      BdApi.Plugins.disable(this.pluginName);
-    };
+      // disable this plugin
+      BdApi.Plugins.disable(Meta.name);
+    }
 
     let modalId = BdApi.UI.showConfirmationModal(
       "Quantum Password", // Try BdApi.React.Fragment

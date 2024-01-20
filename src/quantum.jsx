@@ -9,6 +9,8 @@ import { encryptMessage, decryptMessage } from "@modules/encryption";
 import * as log4q from "@utils/log4q";
 import mainStyles from "@assets/styles/main.scss";
 import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
+import Meta from "@meta";
+import { init as i18nInit, cleanup as i18nCleanup, translate as t } from "@i18n";
 
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
@@ -16,12 +18,13 @@ export default class Quantum {
   data = null;
 
   constructor(meta) {
-    this.meta = meta;
+    Object.assign(Meta, meta);
   }
 
   start() {
-    // this.data = new dataStructure(this.meta.name);
-    BdApi.DOM.addStyle(this.meta.name, mainStyles);
+    this.data = new dataStructure();
+    BdApi.DOM.addStyle(Meta.name, mainStyles);
+    i18nInit();
     this.patchSendMessage();
     this.patchSwitchAccount();
     this.patchMessageContextMenu();
@@ -29,8 +32,9 @@ export default class Quantum {
 
   stop() {
     Patcher.unpatchAll("encryptMessage");
+    i18nCleanup();
     this.unpatchMessageContextMenu();
-    BdApi.DOM.removeStyle(this.meta.name);
+    BdApi.DOM.removeStyle(Meta.name);
   }
 
   patchSendMessage() {
@@ -63,7 +67,7 @@ export default class Quantum {
           args[0]
         );
         if (this.data.userId !== args[0]) {
-          this.data = new dataStructure(this.meta.name, args[0]);
+          this.data = new dataStructure(args[0]);
         }
       }
     );
@@ -100,7 +104,7 @@ export default class Quantum {
         );
         const decryptItem = createContextMenu(
           ContextMenu,
-          "Nachricht entschlüsseln",
+          t("decrypt_message"),
           performDecryptAction
         );
         insertIntoTree(tree, 4, decryptItem);
@@ -110,7 +114,7 @@ export default class Quantum {
         const performOriginalAction = originalAction(messageElement);
         const originalItem = createContextMenu(
           ContextMenu,
-          "Original anzeigen",
+          t("show_original"),
           performOriginalAction
         );
         insertIntoTree(tree, 4, originalItem);
