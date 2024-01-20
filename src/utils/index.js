@@ -8,11 +8,11 @@ export function getAllTextOfElement(element) {
   return text;
 }
 
-export function createContextMenu(ContextMenu, label, action) {
+export function createContextMenu(ContextMenu, label, action, customIcon) {
   return ContextMenu.buildItem({
     label: label,
     type: "text",
-    icon: contextIcon,
+    icon: customIcon || contextIcon,
     action: action,
   });
 }

@@ -3,6 +3,8 @@ import branca from "branca";
 import * as scryptJs from "scrypt-js";
 import * as log4q from "@utils/log4q";
 import InputField from "@components/InputField";
+import { classNames } from "@utils";
+import { QUANTUM_CLASS } from "@utils/constants";
 import Meta from "@meta";
 
 const dataDirectory = __dirname + "/../quantum/";
@@ -58,25 +60,27 @@ export default class dataStructure {
   }
 
   load() {
+    let encryptedData;
     try {
-      let encryptedData = fs.readFileSync(
-        dataDirectory + "data_" + this.userId
-      );
-      let decryptedJsonData = this.decrypt(encryptedData);
-      this.dataObject = JSON.parse(decryptedJsonData);
-
-      console.log("Loaded & decrypted data object: ", dataObject);
+      encryptedData = fs.readFileSync(dataDirectory + "data_" + this.userId);
     } catch (error) {
-      log4q.error(error);
-      return -1;
+      this.save();
+      return 0;
     }
+    try {
+      let decryptedJsonData = this.decrypt(encryptedData);
+      this.#dataObject = JSON.parse(decryptedJsonData);
+    } catch (error) {
+      log4q.error("Wrong password or data file corrupted\n", error);
+      return 0;
+    }
+    return 1;
   }
 
   save() {
     let jsonData = JSON.stringify(this.#dataObject);
 
     let encryptedData = this.encrypt(jsonData);
-    log4q.log("Encrypted data: ", encryptedData);
 
     if (!fs.existsSync(dataDirectory)) {
       fs.mkdirSync(dataDirectory, { recursive: true });
@@ -125,10 +129,10 @@ export default class dataStructure {
 
     let modalId = BdApi.UI.showConfirmationModal(
       "Quantum Password",
-      <InputField
-        ref={inputRef}
-        handleConfirm={handleConfirm}
-        type="password"
+        <InputField
+          ref={inputRef}
+          handleConfirm={handleConfirm}
+          type="password"
       />,
       {
         confirmText: "Enter",
