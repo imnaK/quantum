@@ -7,7 +7,7 @@ import {
 } from "@utils";
 import { encryptMessage, decryptMessage } from "@modules/encryption";
 import * as log4q from "@utils/log4q";
-import mainStyles from "@assets/styles/main.css";
+import mainStyles from "@assets/styles/main.scss";
 import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
 
 const { Patcher, Webpack, ContextMenu } = BdApi;

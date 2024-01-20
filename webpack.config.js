@@ -123,10 +123,16 @@ module.exports = (env) => ({
   },
   module: {
     rules: [
-      { test: /\.css$/, exclude: /node_modules/, use: "raw-loader" },
+      { test: /\.css$/, exclude: /node_modules/, use: "css-loader" },
+      {
+        test: /\.(s(a|c)ss)$/,
+        exclude: /node_modules/,
+        use: ["css-loader", "sass-loader"],
+      },
       { test: /\.jsx$/, exclude: /node_modules/, use: "babel-loader" },
       {
         test: /\.svg$/,
+        exclude: /node_modules/,
         use: "raw-loader",
       },
       {
@@ -169,14 +175,15 @@ module.exports = (env) => ({
             return path.join(process.env.HOME, ".config");
           })();
 
-          const bdPluginFolder = path.join(userConfig, "BetterDiscord", "plugins");
+          const bdPluginFolder = path.join(
+            userConfig,
+            "BetterDiscord",
+            "plugins"
+          );
           const filePath = path.join(bdPluginFolder, pluginName + ".plugin.js");
 
           // Copy the plugin file to the plugin folder
-          fs.copyFileSync(
-            info.targetPath,
-            filePath
-          );
+          fs.copyFileSync(info.targetPath, filePath);
           console.log(
             "\ncopied " +
               ccGreen +
