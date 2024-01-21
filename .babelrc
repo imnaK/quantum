@@ -8,12 +8,15 @@
           "chrome": "108"
         }
       }
-    ],
-
+    ]
+  ],
+  "plugins": [
     [
-      "@babel/preset-react",
+      "@babel/plugin-transform-react-jsx",
       {
-        "pragma": "BdApi.React.createElement"
+        "pragma": "BdApi.React.createElement",
+        "pragmaFrag": "BdApi.React.Fragment",
+        "throwIfNamespace": false
       }
     ]
   ]

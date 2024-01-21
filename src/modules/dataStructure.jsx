@@ -129,11 +129,11 @@ export default class dataStructure {
 
       // disable this plugin
       BdApi.Plugins.disable(Meta.name);
-    }
+    };
 
     let modalId = BdApi.UI.showConfirmationModal(
-      "Quantum Password", // Try BdApi.React.Fragment
-      <React.Fragment>
+      "Quantum Password",
+      <>
         <span className={classNames(QUANTUM_CLASS, "inputErrorText")}>
           {schinken || ""}
         </span>
@@ -142,7 +142,7 @@ export default class dataStructure {
           handleConfirm={handleConfirm}
           type="password"
         />
-      </React.Fragment>,
+      </>,
       {
         confirmText: "Enter",
         cancelText: "Nevermind",
