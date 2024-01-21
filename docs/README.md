@@ -1,6 +1,6 @@
 
 <h1 align="center">
-  <img src="./assets/img/quantum-color.svg" alt="Quantum logo" width="160px"></a>
+  <img src="../assets/img/quantum-color.svg" alt="Quantum logo" width="160px"></a>
   <br>
   Quantum
 </h1>
