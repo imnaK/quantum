@@ -12,6 +12,13 @@ class Qef {
   #data = null;
 
   constructor() {
+    this.reset();
+  }
+
+  reset() {
+    this.#filePath = null;
+    this.#key = null;
+    this.#data = null;
     this.setFileDirectory();
   }
 
