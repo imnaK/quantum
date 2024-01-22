@@ -13,8 +13,12 @@
 
 <p align="center">
   <img alt="Current Version" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FimnaK%2Fquantum%2Fmaster%2Fpackage.json&query=%24.version&label=version">
+  <a href="../LICENSE">
   <img alt="GitHub License" src="https://img.shields.io/github/license/imnak/quantum">
+  </a>
+  <a href="https://betterdiscord.app/">
   <img alt="BetterDiscord" src="https://img.shields.io/badge/Better-Discord-gray?labelColor=%234C83E8">
+  </a>
 </p>
 
 ## Prerequisites
