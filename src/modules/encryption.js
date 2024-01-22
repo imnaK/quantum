@@ -1,5 +1,5 @@
 import branca from "branca";
-import * as log4q from "@utils/log4q";
+import log4q from "@utils/log4q";
 import { QUANTUM_PREFIX } from "@utils/constants";
 import secret from "/.secret.json";
 

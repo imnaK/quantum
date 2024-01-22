@@ -18,4 +18,4 @@ const log = logWithPrefix.bind(null, console.log);
 const warn = logWithPrefix.bind(null, console.warn);
 const error = logWithPrefix.bind(null, console.error);
 
-export { log, warn, error };
+export default { log, warn, error };

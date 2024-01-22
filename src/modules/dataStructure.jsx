@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import branca from "branca";
 import * as scryptJs from "scrypt-js";
-import * as log4q from "@utils/log4q";
+import log4q from "@utils/log4q";
 import InputField from "@components/InputField";
 import { classNames } from "@utils";
 import { QUANTUM_CLASS } from "@utils/constants";

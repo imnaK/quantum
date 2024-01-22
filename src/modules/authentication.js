@@ -1,7 +1,7 @@
 import * as nacl from "tweetnacl";
 import * as naclUtil from "tweetnacl-util";
 import Quantum from "@quantum";
-import * as log4q from "@utils/log4q";
+import log4q from "@utils/log4q";
 
 export default class authentication {
   constructor() {
@@ -39,7 +39,8 @@ export default class authentication {
   }
 
   decrypt(receiverSecretKey, encryptedData) {
-    const receiverSecretKeyUint8Array = naclUtil.decodeBase64(receiverSecretKey);
+    const receiverSecretKeyUint8Array =
+      naclUtil.decodeBase64(receiverSecretKey);
     const nonce = naclUtil.decodeBase64(encryptedData.nonce);
     const ciphertext = naclUtil.decodeBase64(encryptedData.ciphertext);
     const ephemPubKey = naclUtil.decodeBase64(encryptedData.ephemPubKey);
