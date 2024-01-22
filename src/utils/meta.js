@@ -27,7 +27,7 @@ const MetaProxy = new Proxy(new Meta(), {
       target[prop] = value;
     }
     return true;
-  }
+  },
 });
 
 export default MetaProxy;

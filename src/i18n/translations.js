@@ -6,7 +6,7 @@ const translations = {
   de: {
     decrypt_message: "Nachricht entschlüsseln",
     show_original: "Original anzeigen",
-  }
+  },
 };
 
 export default translations;
