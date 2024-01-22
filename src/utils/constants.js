@@ -1,2 +1,5 @@
-export const QUANTUM_PREFIX = "q:";
-export const QUANTUM_CLASS = "quantum";
+const QUANTUM_PREFIX = "q:";
+const QUANTUM_CLASS = "quantum";
+const QUANTUM_ENCRYPTION_FILE_NAME = "quantum-keys.enc";
+
+export { QUANTUM_PREFIX, QUANTUM_CLASS, QUANTUM_ENCRYPTION_FILE_NAME };
