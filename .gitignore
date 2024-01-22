@@ -3,3 +3,4 @@ quantum.code-workspace
 node_modules
 build
 .secret.json
+bun.lockb
