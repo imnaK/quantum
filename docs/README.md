@@ -1,8 +1,6 @@
-<p align="center">
-  <img src="../assets/img/quantum-color.svg" alt="Quantum logo" width="160px">
-</p>
-
 <h1 align="center">
+  <img src="../assets/img/quantum-color.svg" alt="Quantum logo" width="160px">
+<br>
   Quantum
 </h1>
 
@@ -12,14 +10,24 @@
 </h3>
 
 <p align="center">
-  <img alt="Current Version" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FimnaK%2Fquantum%2Fmaster%2Fpackage.json&query=%24.version&label=version">
-  <a href="../LICENSE">
-  <img alt="GitHub License" src="https://img.shields.io/github/license/imnak/quantum">
-  </a>
-  <a href="https://betterdiscord.app/">
-  <img alt="BetterDiscord" src="https://img.shields.io/badge/Better-Discord-gray?labelColor=%234C83E8">
-  </a>
+    <a href="../../../releases/latest"><img alt="Current Version" src="https://img.shields.io/github/package-json/version/imnak/quantum"></a>
+  &nbsp;
+  <a href="../LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/imnak/quantum"></a>
+  &nbsp;
+  <a href="https://betterdiscord.app/"><img alt="BetterDiscord" src="https://img.shields.io/badge/Better-Discord-gray?labelColor=%234C83E8"></a>
 </p>
+
+<img src="../assets/img/quantum-usage.gif" alt="Usage GIF">
+
+<h5 align="center">
+  <a href="#prerequisites">Prerequisites</a>
+  &nbsp;‒&nbsp;
+  <a href="#getting-started">Getting started</a>
+  &nbsp;‒&nbsp;
+  <a href="#build">Build</a>
+  &nbsp;‒&nbsp;
+  <a href="#usage">Usage</a>
+</h5>
 
 ## Prerequisites
 
@@ -55,7 +63,7 @@ node -e "require('fs').writeFileSync('.secret.json',JSON.stringify({key:require(
 
 #### Disclaimer: Please note that anyone possessing the secret key has the ability to decrypt the messages!
 
-## Usage
+## Build
 
 Build the project
 
@@ -73,10 +81,14 @@ The corresponding file `build\Quantum.plugin.js` or `build\Quantum.min.plugin.js
 
 Afterwards, the plugin will be automatically copied to the BetterDiscord plugin directory.
 
-## Additional Tools
+### Additional Tools
 
 Format using the [project standard](./.prettierrc)
 
 ```bash
 npm run format
 ```
+
+## Usage
+
+Use the prefix q: to write encrypted messages and decrypt them by right clicking.
