@@ -69,24 +69,24 @@ class Qef {
   }
 
   getExchangePrivateKey() {
-    return this.#data?.exchangeKeys.privateKey;
+    return this.#data?.exchangeKeyPair.privateKey;
   }
 
   getExchangePublicKey() {
-    return this.#data?.exchangeKeys.publicKey;
+    return this.#data?.exchangeKeyPair.publicKey;
   }
 
-  generateExchangeKeys() {
+  generateExchangeKeyPair() {
     const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
       modulusLength: 4096,
     });
 
-    this.#data.exchangeKeys.privateKey = privateKey.export({
+    this.#data.exchangeKeyPair.privateKey = privateKey.export({
       type: "pkcs1",
       format: "pem",
     });
 
-    this.#data.exchangeKeys.publicKey = publicKey.export({
+    this.#data.exchangeKeyPair.publicKey = publicKey.export({
       type: "pkcs1",
       format: "pem",
     });
@@ -98,7 +98,7 @@ class Qef {
 
   ensureData() {
     if (!this.dataExist()) {
-      this.#data = { userKeys: {}, exchangeKeys: {} };
+      this.#data = { userKeys: {}, exchangeKeyPair: {} };
       log4q.log("The data model got (re-)initialized.");
     }
   }
