@@ -4,10 +4,10 @@
   Quantum
 </h1>
 
-<h3 align="center">
+<h4 align="center">
   Quantum is a Better Discord plugin offering enhanced privacy through message encryption. <br>
   Just keep in mind, it's a step up from typical messaging, but absolute security isn't guaranteed.
-</h3>
+</h4>
 
 <p align="center">
     <a href="../../../releases/latest"><img alt="Current Version" src="https://img.shields.io/github/package-json/version/imnak/quantum"></a>
