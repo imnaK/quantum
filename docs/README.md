@@ -17,7 +17,7 @@
   <a href="https://betterdiscord.app/"><img alt="BetterDiscord" src="https://img.shields.io/badge/Better-Discord-gray?labelColor=%234C83E8"></a>
 </p>
 
-<p align="center">
+<h5 align="center">
   <a href="#prerequisites">Prerequisites</a>
   &nbsp;‒&nbsp;
   <a href="#getting-started">Getting started</a>
@@ -25,7 +25,7 @@
   <a href="#build">Build</a>
   &nbsp;‒&nbsp;
   <a href="#usage">Usage</a>
-</p>
+</h5>
 
 <p align="center">
   <img src="../assets/img/quantum-usage.gif" alt="Usage GIF">
