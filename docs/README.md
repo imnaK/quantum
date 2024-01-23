@@ -4,10 +4,10 @@
   Quantum
 </h1>
 
-<h4 align="center">
+<p align="center">
   Quantum is a Better Discord plugin offering enhanced privacy through message encryption. <br>
   Just keep in mind, it's a step up from typical messaging, but absolute security isn't guaranteed.
-</h4>
+</p>
 
 <p align="center">
     <a href="../../../releases/latest"><img alt="Current Version" src="https://img.shields.io/github/package-json/version/imnak/quantum"></a>
@@ -17,7 +17,7 @@
   <a href="https://betterdiscord.app/"><img alt="BetterDiscord" src="https://img.shields.io/badge/Better-Discord-gray?labelColor=%234C83E8"></a>
 </p>
 
-<h5 align="center">
+<p align="center">
   <a href="#prerequisites">Prerequisites</a>
   &nbsp;‒&nbsp;
   <a href="#getting-started">Getting started</a>
@@ -25,7 +25,7 @@
   <a href="#build">Build</a>
   &nbsp;‒&nbsp;
   <a href="#usage">Usage</a>
-</h5>
+</p>
 
 <p align="center">
   <img src="../assets/img/quantum-usage.gif" alt="Usage GIF">
