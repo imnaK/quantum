@@ -8,7 +8,7 @@ import {
 import { encryptMessage, decryptMessage } from "@modules/encryption";
 import * as log4q from "@utils/log4q";
 import mainStyles from "@assets/styles/main.scss";
-import { QUANTUM_PREFIXES, QUANTUM_CLASS } from "@utils/constants";
+import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
 import Meta from "@meta";
 import { init as i18nInit, cleanup as i18nCleanup, translate as t } from "@i18n";
 
