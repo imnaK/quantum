@@ -11,7 +11,6 @@ import mainStyles from "@assets/styles/main.scss";
 import { QUANTUM_PREFIXES, QUANTUM_CLASS } from "@utils/constants";
 import Meta from "@meta";
 import { init as i18nInit, cleanup as i18nCleanup, translate as t } from "@i18n";
-import "@utils/startsWithAny";
 
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
@@ -84,7 +83,7 @@ export default class Quantum {
   // Encrypt message before sending
   handleMessageSend(_, args) {
     const message = args[1].content;
-    if (message.startsWithAny(QUANTUM_PREFIXES))
+    if (message.startsWith(QUANTUM_PREFIX))
       args[1].content = encryptMessage(message);
   }
 
@@ -96,7 +95,7 @@ export default class Quantum {
     const messageContent = getAllTextOfElement(messageElement);
 
     // Checks if it's a Quantum message
-    if (messageContent.startsWithAny(QUANTUM_PREFIXES)) {
+    if (messageContent.startsWith(QUANTUM_PREFIX)) {
       // Checks if the message is encrypted, then adds a decrypt button
       if (messageElement.querySelector(`.${QUANTUM_CLASS}`) === null) {
         const performDecryptAction = decryptAction(
@@ -138,7 +137,7 @@ const decryptAction = (messageElement, message) => (e) => {
 
   // Create and append prefix
   messageElement.append(
-    createSpan(QUANTUM_CLASS, QUANTUM_PREFIXES, {
+    createSpan(QUANTUM_CLASS, QUANTUM_PREFIX, {
       color: "DeepSkyBlue",
     })
   );
