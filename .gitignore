@@ -1,5 +1,15 @@
+# IDE files / workspace settings
 .vscode
 quantum.code-workspace
+
+# dependencies and lock files
 node_modules
+yarn.lock
+package-lock.json
+bun.lockb
+
+# builded files
 build
+
+# test files
 .secret.json
