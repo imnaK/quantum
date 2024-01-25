@@ -54,6 +54,7 @@ class Qef {
   }
 
   isKeyValid(keyToCheck = this.#key) {
+    // TODO: These checks are completely useless because the key is hex encoded. :facepalm: please remove
     const pattern = /^[a-zA-Z0-9 !@#$%^&*()\-=\[\]{}\\|;:'",.<>\/?~`]*$/;
 
     if (
