@@ -22,7 +22,7 @@ export default class Quantum {
   }
 
   start() {
-    this.data = new dataStructure();
+    //this.data = new dataStructure();
     BdApi.DOM.addStyle(Meta.name, mainStyles);
     i18nInit();
     this.patchSendMessage();
