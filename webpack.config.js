@@ -33,7 +33,7 @@ module.exports = (env) => ({
   mode: "development",
   target: "node",
   devtool: false,
-  watch: true,
+  watch: env && env.watch,
   watchOptions: {
     ignored: /node_modules/,
   },
