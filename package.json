@@ -38,9 +38,8 @@
   },
   "main": "./src/quantum.jsx",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --progress --color",
-    "build:production": "webpack --env production --progress --color",
+    "build": "webpack --env production --progress --color",
+    "dev": "webpack --env watch --progress --color",
     "format": "prettier --write \"./**/*.{js,jsx,json,css,*rc}\""
   },
   "private": true,
