@@ -19,22 +19,28 @@ import {
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
 import qef from "@modules/qef";
-import secretKey from "/.secret.json";
 
-function exampleQef() {
-  qef.setKey(secretKey.key);
+async function exampleQef() {
+  const userId = BdApi.Webpack.getModule(
+    BdApi.Webpack.Filters.byKeys("getCurrentUser")
+  ).getCurrentUser().id;
+
+  qef.init(userId);
+  log4q.log("userId:", qef.getUserId());
+
+  await qef.setMasterPassword("mypassword");
   qef.readData();
   if (qef.dataExist()) {
-    log4q.log("Data exists");
+    log4q.log("%cData exists", "color: green");
     qef.printData();
   } else {
-    log4q.log("Data does not exist");
-    qef.ensureData();
+    log4q.log("%cData does not exist", "color: red");
     qef.generateExchangeKeyPair();
-    qef.setUserKey("231692919638065153", "sec-ret-key-yam");
-    qef.setUserKey("446683526226509827", "sec-ret-key-haz");
+    qef.setChannelKey("231692919638065153", "sec-ret-key-yam");
+    qef.setChannelKey("446683526226509827", "sec-ret-key-haz");
     qef.printData();
   }
+  qef.writeData();
 }
 
 export default class Quantum {
@@ -47,7 +53,7 @@ export default class Quantum {
   start() {
     exampleQef();
 
-    this.data = new dataStructure();
+    // this.data = new dataStructure();
     BdApi.DOM.addStyle(Meta.name, mainStyles);
     i18nInit();
     this.patchSendMessage();
@@ -57,7 +63,7 @@ export default class Quantum {
 
   stop() {
     qef.writeData();
-    qef.reset();
+    qef.deconstruct();
 
     Patcher.unpatchAll("encryptMessage");
     i18nCleanup();

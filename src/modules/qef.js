@@ -1,35 +1,46 @@
 import fs from "fs";
-import branca from "branca";
+import path from "path";
 import log4q from "@utils/log4q";
-import crypto from "crypto";
-import {
-  QUANTUM_ENCRYPTION_FILE_NAME,
-  QUANTUM_ENCRYPTION_DIRECTORY_PATH,
-} from "@utils/constants";
+import branca from "branca";
+import jsrsasign from "jsrsasign";
+import scryptjs from "scrypt-js";
+import { QUANTUM_NAME } from "@utils/constants";
+
+const DEFAULT_DIRECTORY_PATH = path.resolve(__dirname, "..", QUANTUM_NAME);
+const QUANTUM_ENCRYPTION_FILE_NAME = `${QUANTUM_NAME}-keys.enc`;
+const RSA_KEY_SIZE = 2048;
 
 // Qef is short for Quantum Encryption File
 class Qef {
   #filePath = null;
   #key = null;
   #data = null;
+  #userId = null;
 
-  constructor() {
-    this.reset();
-  }
-
-  reset() {
+  init(userId, directoryPath = DEFAULT_DIRECTORY_PATH) {
     this.#filePath = null;
     this.#key = null;
     this.#data = null;
-    this.setFileDirectory();
+    this.#userId = userId;
+    this.setFileDirectory(directoryPath);
+    this.ensureData();
   }
 
-  setFileDirectory(directoryPath = QUANTUM_ENCRYPTION_DIRECTORY_PATH) {
+  deconstruct() {
+    this.#filePath = null;
+    this.#key = null;
+    this.#data = null;
+    this.#userId = null;
+  }
+
+  setFileDirectory(directoryPath = DEFAULT_DIRECTORY_PATH) {
+    log4q.log("Setting the file directory to:", directoryPath);
     if (
       fs.existsSync(directoryPath) &&
       fs.lstatSync(directoryPath).isDirectory()
     ) {
-      this.#filePath = path.join(directoryPath, QUANTUM_ENCRYPTION_FILE_NAME);
+      const fileName = `${this.#userId}-${QUANTUM_ENCRYPTION_FILE_NAME}`;
+      this.#filePath = path.join(directoryPath, fileName);
     } else {
       log4q.error("The provided path is not a valid directory:", directoryPath);
     }
@@ -43,16 +54,40 @@ class Qef {
     return fs.existsSync(this.#filePath);
   }
 
-  setKey(newKey) {
-    this.#key = new branca(newKey);
+  async setMasterPassword(password) {
+    if (!this.#userId) {
+      log4q.error("The user ID is not set.");
+      return;
+    }
+
+    const encoder = new TextEncoder();
+    const passwordUint8Array = encoder.encode(password);
+    const saltUint8Array = encoder.encode(this.#userId);
+    const N = 1024,
+      r = 8,
+      p = 1,
+      dkLen = 32;
+    const key = await scryptjs.scrypt(
+      passwordUint8Array,
+      saltUint8Array,
+      N,
+      r,
+      p,
+      dkLen
+    );
+    this.#key = new branca(key);
   }
 
-  getUserKey(userId) {
-    return this.#data?.userKeys[userId];
+  getUserId() {
+    return this.#userId;
   }
 
-  setUserKey(userId, key) {
-    this.#data.userKeys[userId] = key;
+  getChannelKey(channelId) {
+    return this.#data?.channelKeys[channelId];
+  }
+
+  setChannelKey(channelId, channelKey) {
+    this.#data.channelKeys[channelId] = channelKey;
   }
 
   getExchangePrivateKey() {
@@ -64,20 +99,16 @@ class Qef {
   }
 
   generateExchangeKeyPair() {
-    this.ensureData();
-    const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
-      modulusLength: 4096,
-    });
-
-    this.#data.exchangeKeyPair.privateKey = privateKey.export({
-      type: "pkcs1",
-      format: "pem",
-    });
-
-    this.#data.exchangeKeyPair.publicKey = publicKey.export({
-      type: "pkcs1",
-      format: "pem",
-    });
+    log4q.log("Generating a new exchange key pair."); // TODO: Remove this log after testing
+    const keyPair = jsrsasign.KEYUTIL.generateKeypair("RSA", RSA_KEY_SIZE);
+    this.#data.exchangeKeyPair.privateKey = jsrsasign.KEYUTIL.getPEM(
+      keyPair.prvKeyObj,
+      "PKCS1PRV"
+    );
+    this.#data.exchangeKeyPair.publicKey = jsrsasign.KEYUTIL.getPEM(
+      keyPair.pubKeyObj,
+      "PKCS8PUB"
+    );
   }
 
   dataExist() {
@@ -86,7 +117,7 @@ class Qef {
 
   ensureData() {
     if (!this.dataExist()) {
-      this.#data = { userKeys: {}, exchangeKeyPair: {} };
+      this.#data = { channelKeys: {}, exchangeKeyPair: {} };
       log4q.log("The data model got (re-)initialized."); // TODO: Remove this log after testing
     }
   }
