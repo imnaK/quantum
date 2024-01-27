@@ -1,9 +1,11 @@
 import fs from "fs";
-import path from "path";
 import branca from "branca";
 import log4q from "@utils/log4q";
 import crypto from "crypto";
-import { QUANTUM_ENCRYPTION_FILE_NAME } from "@utils/constants";
+import {
+  QUANTUM_ENCRYPTION_FILE_NAME,
+  QUANTUM_ENCRYPTION_DIRECTORY_PATH,
+} from "@utils/constants";
 
 // Qef is short for Quantum Encryption File
 class Qef {
@@ -22,14 +24,14 @@ class Qef {
     this.setFileDirectory();
   }
 
-  setFileDirectory(directoryPath = __dirname) {
+  setFileDirectory(directoryPath = QUANTUM_ENCRYPTION_DIRECTORY_PATH) {
     if (
       fs.existsSync(directoryPath) &&
       fs.lstatSync(directoryPath).isDirectory()
     ) {
       this.#filePath = path.join(directoryPath, QUANTUM_ENCRYPTION_FILE_NAME);
     } else {
-      log4q.error("The provided path is not a valid directory.");
+      log4q.error("The provided path is not a valid directory:", directoryPath);
     }
   }
 
@@ -42,11 +44,7 @@ class Qef {
   }
 
   setKey(newKey) {
-    if (this.isKeyValid(newKey)) {
-      this.#key = new branca(newKey);
-    } else {
-      log4q.error("The key could not be changed.");
-    }
+    this.#key = new branca(newKey);
   }
 
   getUserKey(userId) {
@@ -66,6 +64,7 @@ class Qef {
   }
 
   generateExchangeKeyPair() {
+    this.ensureData();
     const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
       modulusLength: 4096,
     });
@@ -88,7 +87,7 @@ class Qef {
   ensureData() {
     if (!this.dataExist()) {
       this.#data = { userKeys: {}, exchangeKeyPair: {} };
-      log4q.log("The data model got (re-)initialized.");
+      log4q.log("The data model got (re-)initialized."); // TODO: Remove this log after testing
     }
   }
 
@@ -113,7 +112,7 @@ class Qef {
     }
   }
 
-  // TODO: Remove this function after testing
+  // TODO: Remove this log method after testing
   printData() {
     log4q.log(this.#data);
   }
