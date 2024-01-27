@@ -92,6 +92,10 @@ class Qef {
   }
 
   writeData() {
+    if (!this.dataExist()) {
+      log4q.error("No data to write.");
+      return;
+    }
     try {
       const encrypted = this.#key.encode(JSON.stringify(this.#data));
       fs.writeFileSync(this.#filePath, encrypted, "utf8");
@@ -105,9 +109,13 @@ class Qef {
       try {
         const encryptedData = fs.readFileSync(this.#filePath, "utf8");
         const decrypted = this.#key.decode(encryptedData);
-        this.#data = JSON.parse(decrypted.toString());
+        try {
+          this.#data = JSON.parse(decrypted.toString());
+        } catch (error) {
+          log4q.error("The decrypted data is not valid JSON.", error);
+        }
       } catch (error) {
-        log4q.error("The file could not be read.");
+        log4q.error("The file could not be read.", error);
       }
     }
   }
