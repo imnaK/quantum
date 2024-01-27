@@ -49,25 +49,6 @@ class Qef {
     }
   }
 
-  getKey() {
-    return this.#key;
-  }
-
-  isKeyValid(keyToCheck = this.#key) {
-    // TODO: These checks are completely useless because the key is hex encoded. :facepalm: please remove
-    const pattern = /^[a-zA-Z0-9 !@#$%^&*()\-=\[\]{}\\|;:'",.<>\/?~`]*$/;
-
-    if (
-      keyToCheck.length < 8 ||
-      keyToCheck.length > 64 ||
-      !pattern.test(keyToCheck)
-    ) {
-      log4q.error("The key is not valid.");
-      return false;
-    }
-    return true;
-  }
-
   getUserKey(userId) {
     return this.#data?.userKeys[userId];
   }
