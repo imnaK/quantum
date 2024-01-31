@@ -1,7 +1,7 @@
 import dataStructure from "@modules/dataStructure";
 import log4q from "@utils/log4q";
 import Meta from "@meta";
-import qef from "@modules/qef";
+import enc from "@modules/encryptionFileManager";
 import { encryptMessage, decryptMessage } from "@modules/encryption";
 import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
 import {
@@ -19,24 +19,24 @@ import mainStyles from "@assets/styles/main.scss";
 
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
-async function exampleQef() {
+async function exampleEnc() {
   // get current user id
   const userId = BdApi.Webpack.getModule(
     BdApi.Webpack.Filters.byKeys("getCurrentUser")
   ).getCurrentUser().id;
 
   // initialize qef
-  qef.init(userId);
-  await qef.setMasterPassword("mypassword");
-  qef.readData();
+  enc.init(userId);
+  await enc.setMasterPassword("mypassword");
+  enc.readData();
 
   // set channel keys
-  qef.setChannelKey("231692919638065153", "sec-ret-key-yam");
-  qef.setChannelKey("446683526226509827", "sec-ret-key-haz");
+  enc.setChannelKey("231692919638065153", "sec-ret-key-yam");
+  enc.setChannelKey("446683526226509827", "sec-ret-key-haz");
 
   // output data and write to file
-  qef.printData();
-  qef.writeData();
+  enc.printData();
+  enc.writeData();
 }
 
 export default class Quantum {
@@ -47,7 +47,7 @@ export default class Quantum {
   }
 
   start() {
-    exampleQef();
+    exampleEnc();
 
     // this.data = new dataStructure();
     BdApi.DOM.addStyle(Meta.name, mainStyles);
@@ -58,8 +58,8 @@ export default class Quantum {
   }
 
   stop() {
-    qef.writeData();
-    qef.deconstruct();
+    enc.writeData();
+    enc.deconstruct();
 
     Patcher.unpatchAll("encryptMessage");
     i18nCleanup();

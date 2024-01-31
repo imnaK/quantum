@@ -10,8 +10,7 @@ import { QUANTUM_NAME } from "@utils/constants";
 const DEFAULT_DIRECTORY_PATH = path.resolve(__dirname, "..", QUANTUM_NAME);
 const QUANTUM_ENCRYPTION_FILE_NAME = `${QUANTUM_NAME}-keys.enc`;
 
-// Qef is short for Quantum Encryption File
-class Qef {
+class EncryptionFileManager {
   #filePath = null;
   #key = null;
   #data = null;
@@ -138,4 +137,4 @@ class Qef {
   }
 }
 
-export default new Qef();
+export default new EncryptionFileManager();
