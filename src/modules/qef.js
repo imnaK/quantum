@@ -104,7 +104,7 @@ class Qef {
 
   ensureData() {
     if (!this.dataExist()) {
-      keyPair = generateExchangeKeyPair();
+      const keyPair = generateExchangeKeyPair();
 
       this.#data = {
         channelKeys: {},
