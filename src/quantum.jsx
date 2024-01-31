@@ -2,7 +2,6 @@ import dataStructure from "@modules/dataStructure";
 import log4q from "@utils/log4q";
 import Meta from "@meta";
 import qef from "@modules/qef";
-import * as auth from "@modules/authentication";
 import { encryptMessage, decryptMessage } from "@modules/encryption";
 import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
 import {
@@ -32,8 +31,6 @@ async function exampleQef() {
     log4q.log("%cData exists", "color: green");
   } else {
     log4q.log("%cData does not exist", "color: red");
-    keyPair = auth.generateExchangeKeyPair();
-    qef.setExchangeKeyPair(keyPair);
     qef.setChannelKey("231692919638065153", "sec-ret-key-yam");
     qef.setChannelKey("446683526226509827", "sec-ret-key-haz");
   }

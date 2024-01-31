@@ -3,6 +3,7 @@ import path from "path";
 import log4q from "@utils/log4q";
 import branca from "branca";
 import scryptjs from "scrypt-js";
+import { generateExchangeKeyPair } from "@modules/authentication";
 import { QUANTUM_NAME } from "@utils/constants";
 
 const DEFAULT_DIRECTORY_PATH = path.resolve(__dirname, "..", QUANTUM_NAME);
@@ -97,18 +98,22 @@ class Qef {
     return this.#data?.exchangeKeyPair.publicKey;
   }
 
-  setExchangeKeyPair(keyPair) {
-    this.#data.exchangeKeyPair.secretKey = keyPair.secretKey;
-    this.#data.exchangeKeyPair.publicKey = keyPair.publicKey;
-  }
-
   dataExist() {
     return !!this.#data;
   }
 
   ensureData() {
     if (!this.dataExist()) {
-      this.#data = { channelKeys: {}, exchangeKeyPair: {} };
+      keyPair = generateExchangeKeyPair();
+
+      this.#data = {
+        channelKeys: {},
+        exchangeKeyPair: {
+          secretKey: keyPair.secretKey,
+          publicKey: keyPair.publicKey,
+        },
+      };
+
       log4q.log("The data model got (re-)initialized."); // TODO: Remove this log after testing
     }
   }
