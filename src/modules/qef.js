@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import log4q from "@utils/log4q";
 import branca from "branca";
-import jsrsasign from "jsrsasign";
 import scryptjs from "scrypt-js";
 import { QUANTUM_NAME } from "@utils/constants";
 
@@ -90,25 +89,17 @@ class Qef {
     this.#data.channelKeys[channelId] = channelKey;
   }
 
-  getExchangePrivateKey() {
-    return this.#data?.exchangeKeyPair.privateKey;
+  getExchangeSecretKey() {
+    return this.#data?.exchangeKeyPair.secretKey;
   }
 
   getExchangePublicKey() {
     return this.#data?.exchangeKeyPair.publicKey;
   }
 
-  generateExchangeKeyPair() {
-    log4q.log("Generating a new exchange key pair."); // TODO: Remove this log after testing
-    const keyPair = jsrsasign.KEYUTIL.generateKeypair("RSA", RSA_KEY_SIZE);
-    this.#data.exchangeKeyPair.privateKey = jsrsasign.KEYUTIL.getPEM(
-      keyPair.prvKeyObj,
-      "PKCS1PRV"
-    );
-    this.#data.exchangeKeyPair.publicKey = jsrsasign.KEYUTIL.getPEM(
-      keyPair.pubKeyObj,
-      "PKCS8PUB"
-    );
+  setExchangeKeyPair(keyPair) {
+    this.#data.exchangeKeyPair.secretKey = keyPair.secretKey;
+    this.#data.exchangeKeyPair.publicKey = keyPair.publicKey;
   }
 
   dataExist() {

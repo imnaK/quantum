@@ -1,24 +1,24 @@
 import dataStructure from "@modules/dataStructure";
+import log4q from "@utils/log4q";
+import Meta from "@meta";
+import qef from "@modules/qef";
+import * as auth from "@modules/authentication";
+import { encryptMessage, decryptMessage } from "@modules/encryption";
+import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
 import {
   getAllTextOfElement,
   createContextMenu,
   modifyElements,
   createSpan,
 } from "@utils";
-import { encryptMessage, decryptMessage } from "@modules/encryption";
-import log4q from "@utils/log4q";
-import mainStyles from "@assets/styles/main.scss";
-import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
-import Meta from "@meta";
 import {
   init as i18nInit,
   cleanup as i18nCleanup,
   translate as t,
 } from "@i18n";
+import mainStyles from "@assets/styles/main.scss";
 
 const { Patcher, Webpack, ContextMenu } = BdApi;
-
-import qef from "@modules/qef";
 
 async function exampleQef() {
   const userId = BdApi.Webpack.getModule(
@@ -26,20 +26,18 @@ async function exampleQef() {
   ).getCurrentUser().id;
 
   qef.init(userId);
-  log4q.log("userId:", qef.getUserId());
-
   await qef.setMasterPassword("mypassword");
   qef.readData();
   if (qef.dataExist()) {
     log4q.log("%cData exists", "color: green");
-    qef.printData();
   } else {
     log4q.log("%cData does not exist", "color: red");
-    qef.generateExchangeKeyPair();
+    keyPair = auth.generateExchangeKeyPair();
+    qef.setExchangeKeyPair(keyPair);
     qef.setChannelKey("231692919638065153", "sec-ret-key-yam");
     qef.setChannelKey("446683526226509827", "sec-ret-key-haz");
-    qef.printData();
   }
+  qef.printData();
   qef.writeData();
 }
 
