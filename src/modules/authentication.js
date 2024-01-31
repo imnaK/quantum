@@ -1,8 +1,29 @@
 import * as nacl from "tweetnacl";
 import * as naclUtil from "tweetnacl-util";
+import branca from "branca";
+import scryptjs from "scrypt-js";
 
 function generateExchangeKeyPair() {
   return nacl.box.keyPair();
+}
+
+async function generateMasterPassword(password, salt) {
+  const encoder = new TextEncoder();
+  const passwordUint8Array = encoder.encode(password);
+  const saltUint8Array = encoder.encode(salt);
+  const N = 1024,
+    r = 8,
+    p = 1,
+    dkLen = 32;
+  const key = await scryptjs.scrypt(
+    passwordUint8Array,
+    saltUint8Array,
+    N,
+    r,
+    p,
+    dkLen
+  );
+  return new branca(key);
 }
 
 function encrypt(receiverPublicKey, msgParams) {
@@ -48,4 +69,10 @@ function sendChatMessage(content, channelId) {
   });
 }
 
-export { generateExchangeKeyPair, encrypt, decrypt, sendChatMessage };
+export {
+  generateExchangeKeyPair,
+  generateMasterPassword,
+  encrypt,
+  decrypt,
+  sendChatMessage,
+};

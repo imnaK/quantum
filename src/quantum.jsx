@@ -20,20 +20,21 @@ import mainStyles from "@assets/styles/main.scss";
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
 async function exampleQef() {
+  // get current user id
   const userId = BdApi.Webpack.getModule(
     BdApi.Webpack.Filters.byKeys("getCurrentUser")
   ).getCurrentUser().id;
 
+  // initialize qef
   qef.init(userId);
   await qef.setMasterPassword("mypassword");
   qef.readData();
-  if (qef.dataExist()) {
-    log4q.log("%cData exists", "color: green");
-  } else {
-    log4q.log("%cData does not exist", "color: red");
-    qef.setChannelKey("231692919638065153", "sec-ret-key-yam");
-    qef.setChannelKey("446683526226509827", "sec-ret-key-haz");
-  }
+
+  // set channel keys
+  qef.setChannelKey("231692919638065153", "sec-ret-key-yam");
+  qef.setChannelKey("446683526226509827", "sec-ret-key-haz");
+
+  // output data and write to file
   qef.printData();
   qef.writeData();
 }

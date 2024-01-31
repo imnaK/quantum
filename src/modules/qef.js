@@ -1,14 +1,14 @@
 import fs from "fs";
 import path from "path";
 import log4q from "@utils/log4q";
-import branca from "branca";
-import scryptjs from "scrypt-js";
-import { generateExchangeKeyPair } from "@modules/authentication";
+import {
+  generateExchangeKeyPair,
+  generateMasterPassword,
+} from "@modules/authentication";
 import { QUANTUM_NAME } from "@utils/constants";
 
 const DEFAULT_DIRECTORY_PATH = path.resolve(__dirname, "..", QUANTUM_NAME);
 const QUANTUM_ENCRYPTION_FILE_NAME = `${QUANTUM_NAME}-keys.enc`;
-const RSA_KEY_SIZE = 2048;
 
 // Qef is short for Quantum Encryption File
 class Qef {
@@ -60,22 +60,7 @@ class Qef {
       return;
     }
 
-    const encoder = new TextEncoder();
-    const passwordUint8Array = encoder.encode(password);
-    const saltUint8Array = encoder.encode(this.#userId);
-    const N = 1024,
-      r = 8,
-      p = 1,
-      dkLen = 32;
-    const key = await scryptjs.scrypt(
-      passwordUint8Array,
-      saltUint8Array,
-      N,
-      r,
-      p,
-      dkLen
-    );
-    this.#key = new branca(key);
+    this.#key = await generateMasterPassword(password, this.#userId);
   }
 
   getUserId() {
@@ -114,7 +99,7 @@ class Qef {
         },
       };
 
-      log4q.log("The data model got (re-)initialized."); // TODO: Remove this log after testing
+      log4q.log("%cThe data model got (re-)initialized.", "color: yellow;"); // TODO: Remove this log after testing
     }
   }
 
