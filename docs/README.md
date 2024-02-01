@@ -6,7 +6,7 @@
 
 <p align="center">
   Quantum is a Better Discord plugin offering enhanced privacy through message encryption. <br />
-  <b>Disclaimer</b>: Please note that while this messaging system offers enhanced security measures, it does not provide absolute security. We cannot be held responsible for any misuse of this software or any consequences resulting from its use.
+  <b>Disclaimer</b>: Please note that while this messaging system offers enhanced security measures, it does not provide absolute security. We also cannot be held responsible for any misuse of this software or any consequences resulting from its use.
 </p>
 
 <p align="center">
@@ -31,7 +31,7 @@
 
 ## Is this safe?
 
-As previously mentioned, this plugin serves as an additional layer of security rather than an absolute safeguard. It facilitates secure encryption and decryption of messages and keys across different channels. However, it's important to note that there are no fail-safes like 2FA or similar measures in place.
+As mentioned above, this plugin serves as an additional layer of security rather than an absolute safeguard. It facilitates secure encryption and decryption of messages and keys across different channels. However, it's important to note that there are no fail-safes like 2FA or similar measures in place.
 
 ## What cryptography techniques do we use?
 
