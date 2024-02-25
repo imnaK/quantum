@@ -8,9 +8,10 @@ import {
 import { encryptMessage, decryptMessage } from "@modules/encryption";
 import * as log4q from "@utils/log4q";
 import mainStyles from "@assets/styles/main.scss";
-import { QUANTUM_PREFIX, QUANTUM_CLASS } from "@utils/constants";
+import { QUANTUM_PREFIXES, QUANTUM_CLASS } from "@utils/constants";
 import Meta from "@meta";
 import { init as i18nInit, cleanup as i18nCleanup, translate as t } from "@i18n";
+import "@utils/startsWithAny";
 
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
@@ -83,8 +84,8 @@ export default class Quantum {
   // Encrypt message before sending
   handleMessageSend(_, args) {
     const message = args[1].content;
-    if (message.startsWith(QUANTUM_PREFIX))
-      args[1].content = encryptMessage(message);
+    const prefix = message.startsWithAny(QUANTUM_PREFIXES);
+    prefix && (args[1].content = encryptMessage(message, prefix));
   }
 
   // Create and append decrypt button to message context menu
@@ -95,12 +96,14 @@ export default class Quantum {
     const messageContent = getAllTextOfElement(messageElement);
 
     // Checks if it's a Quantum message
-    if (messageContent.startsWith(QUANTUM_PREFIX)) {
+    const prefix = messageContent.startsWithAny(QUANTUM_PREFIXES);
+    if (prefix) {
       // Checks if the message is encrypted, then adds a decrypt button
       if (messageElement.querySelector(`.${QUANTUM_CLASS}`) === null) {
         const performDecryptAction = decryptAction(
           messageElement,
-          messageContent
+          messageContent,
+          prefix
         );
         const decryptItem = createContextMenu(
           ContextMenu,
@@ -127,8 +130,8 @@ const insertIntoTree = (tree, position, item) => {
   tree.props.children[2].props.children.splice(position, 0, item);
 };
 
-const decryptAction = (messageElement, message) => (e) => {
-  const decryptedMessage = decryptMessage(message);
+const decryptAction = (messageElement, message, prefix) => (e) => {
+  const decryptedMessage = decryptMessage(message, prefix);
 
   // Hide original message
   modifyElements(messageElement, "span", (element) => {
@@ -137,7 +140,7 @@ const decryptAction = (messageElement, message) => (e) => {
 
   // Create and append prefix
   messageElement.append(
-    createSpan(QUANTUM_CLASS, QUANTUM_PREFIX, {
+    createSpan(QUANTUM_CLASS, prefix, {
       color: "DeepSkyBlue",
     })
   );
