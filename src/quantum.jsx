@@ -47,7 +47,7 @@ export default class Quantum {
   }
 
   start() {
-    exampleEnc();
+    // exampleEnc();
 
     // this.data = new dataStructure();
     BdApi.DOM.addStyle(Meta.name, mainStyles);
@@ -58,8 +58,8 @@ export default class Quantum {
   }
 
   stop() {
-    enc.writeData();
-    enc.deconstruct();
+    // enc.writeData();
+    // enc.deconstruct();
 
     Patcher.unpatchAll("encryptMessage");
     i18nCleanup();
