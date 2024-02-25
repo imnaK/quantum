@@ -3,7 +3,11 @@ import log4q from "@utils/log4q";
 import Meta from "@meta";
 import enc from "@modules/encryptionFileManager";
 import { encryptMessage, decryptMessage } from "@modules/encryption";
-import { QUANTUM_PREFIXES, QUANTUM_CLASS } from "@utils/constants";
+import {
+  QUANTUM_PREFIXES,
+  QUANTUM_CLASS,
+  QUANTUM_NAME,
+} from "@utils/constants";
 import {
   getAllTextOfElement,
   createContextMenu,
@@ -54,6 +58,7 @@ export default class Quantum {
     BdApi.DOM.addStyle(Meta.name, mainStyles);
     i18nInit();
     this.patchSendMessage();
+    this.patchUploadFiles();
     this.patchSwitchAccount();
     this.patchMessageContextMenu();
   }
@@ -61,23 +66,31 @@ export default class Quantum {
   stop() {
     // enc.writeData();
     // enc.deconstruct();
-
-    Patcher.unpatchAll("encryptMessage");
-    i18nCleanup();
-    this.unpatchMessageContextMenu();
     BdApi.DOM.removeStyle(Meta.name);
+    i18nCleanup();
+    Patcher.unpatchAll(QUANTUM_NAME);
+    this.unpatchMessageContextMenu();
   }
 
+  // Catch regular sent messages
   patchSendMessage() {
     const _sendMessageModule = Webpack.getModule(
       Webpack.Filters.byKeys("_sendMessage")
     );
 
-    BdApi.Patcher.before(
-      "encryptMessage",
-      _sendMessageModule,
-      "sendMessage",
-      (...args) => this.handleMessageSend(...args)
+    Patcher.before(QUANTUM_NAME, _sendMessageModule, "sendMessage", (...args) =>
+      this.handleMessageSend(...args)
+    );
+  }
+
+  // Catch sent messages with attachments
+  patchUploadFiles() {
+    const uploadFilesModule = Webpack.getModule(
+      Webpack.Filters.byKeys("uploadFiles")
+    );
+
+    Patcher.before(QUANTUM_NAME, uploadFilesModule, "uploadFiles", (...args) =>
+      this.handleMessageSend(...args)
     );
   }
 
@@ -87,7 +100,7 @@ export default class Quantum {
     );
 
     Patcher.after(
-      "switchAccount",
+      QUANTUM_NAME,
       switchAccountModule,
       "switchAccount",
       (_, args) => {
@@ -113,9 +126,10 @@ export default class Quantum {
 
   // Encrypt message before sending
   handleMessageSend(_, args) {
-    const message = args[1].content;
-    const prefix = message.startsWithAny(QUANTUM_PREFIXES);
-    prefix && (args[1].content = encryptMessage(message, prefix));
+    const message = args[1] || args[0].parsedMessage,
+      content = message.content,
+      prefix = content.startsWithAny(QUANTUM_PREFIXES);
+    prefix && (message.content = encryptMessage(content, prefix));
   }
 
   // Create and append decrypt button to message context menu
