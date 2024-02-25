@@ -38,3 +38,10 @@ export function createSpan(className, textContent, styles) {
   }
   return spanElement;
 }
+
+export function isPasswordValid(password) {
+  const pattern = /^[a-zA-Z0-9 !@#$%^&*()\-=\[\]{}\\|;:'",.<>\/?~`]*$/;
+  return (
+    password.length >= 8 && password.length <= 64 && pattern.test(password)
+  );
+}

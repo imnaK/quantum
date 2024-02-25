@@ -1,6 +1,5 @@
 import branca from "branca";
-import * as log4q from "@utils/log4q";
-import { QUANTUM_PREFIXES } from "@utils/constants";
+import log4q from "@utils/log4q";
 import secret from "/.secret.json";
 
 const XChaCha20_Poly1305 = new branca(secret.key);

@@ -75,11 +75,8 @@ module.exports = (env) => ({
               const type = comment.type;
               if (type == "comment2") {
                 // multiline comment
-                return (
-                  /@name/.test(text) &&
-                  /@description/.test(text) &&
-                  /@version/.test(text) &&
-                  /@author/.test(text)
+                return ["@name", "@description", "@version", "@author"].every(
+                  (term) => new RegExp(term).test(text)
                 );
               }
             },
