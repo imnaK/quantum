@@ -58,7 +58,7 @@ export default class Quantum {
     BdApi.DOM.addStyle(Meta.name, mainStyles);
     i18nInit();
     this.patchSendMessage();
-    this.patchUploadFiles();
+    this.patchSendMessageAttach();
     this.patchSwitchAccount();
     this.patchMessageContextMenu();
   }
@@ -84,14 +84,23 @@ export default class Quantum {
   }
 
   // Catch sent messages with attachments
-  patchUploadFiles() {
+  patchSendMessageAttach() {
     const uploadFilesModule = Webpack.getModule(
       Webpack.Filters.byKeys("uploadFiles")
     );
 
-    Patcher.before(QUANTUM_NAME, uploadFilesModule, "uploadFiles", (...args) =>
-      this.handleMessageSend(...args)
+    Patcher.before(
+      QUANTUM_NAME,
+      uploadFilesModule,
+      "uploadFiles",
+      (...args) => {
+        this.handleMessageSend(...args);
+      }
     );
+
+    Patcher.before(QUANTUM_NAME, uploadFilesModule, "cancel", (...args) => {
+      this.handleMessageAttachCancel(...args);
+    });
   }
 
   patchSwitchAccount() {
@@ -130,6 +139,15 @@ export default class Quantum {
       content = message.content,
       prefix = content.startsWithAny(QUANTUM_PREFIXES);
     prefix && (message.content = encryptMessage(content, prefix));
+  }
+
+  handleMessageAttachCancel(_, args) {
+    const content = args[0].draftContent;
+    const prefix = content.startsWithAny(QUANTUM_PREFIXES);
+    if (prefix) {
+      const decryptedText = decryptMessage(content, prefix);
+      args[0].draftContent = prefix + decryptedText;
+    }
   }
 
   // Create and append decrypt button to message context menu
