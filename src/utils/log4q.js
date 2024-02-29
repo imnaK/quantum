@@ -14,12 +14,13 @@ function logWithPrefix(consoleFunction, ...args) {
   consoleFunction(...args);
 }
 
-const methods = ["log", "warn", "error", "info", "debug"];
-const log4q = {};
+// Log methods like console.log, console.warn, etc. but for Quantum: log4q.log, log4q.warn, etc.
+const logMethods = ["log", "warn", "error", "info", "debug"];
 
-for (let method of methods) {
-  console[method] &&
-    (log4q[method] = logWithPrefix.bind(null, console[method]));
-}
-
-export default log4q;
+// Create an object with the log methods and bind the logWithPrefix function to each one
+export default Object.fromEntries(
+  logMethods.map((method) => [
+    method,
+    console[method] && logWithPrefix.bind(null, console[method]),
+  ])
+);
