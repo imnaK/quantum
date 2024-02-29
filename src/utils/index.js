@@ -45,3 +45,10 @@ export function isPasswordValid(password) {
     password.length >= 8 && password.length <= 64 && pattern.test(password)
   );
 }
+
+export function getUser() {
+  const module = BdApi.Webpack.getModule(
+    BdApi.Webpack.Filters.byKeys("getCurrentUser")
+  );
+  return module.getCurrentUser();
+}

@@ -25,13 +25,8 @@ import "@utils/startsWithAny";
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
 async function exampleEnc() {
-  // get current user id
-  const userId = BdApi.Webpack.getModule(
-    BdApi.Webpack.Filters.byKeys("getCurrentUser")
-  ).getCurrentUser().id;
-
   // initialize qef
-  enc.init(userId);
+  enc.init();
   await enc.setMasterPassword("mypassword");
   enc.readData();
 
@@ -43,6 +38,10 @@ async function exampleEnc() {
   enc.printData();
   enc.writeData();
 }
+
+function exampleExchange () {
+  
+} 
 
 export default class Quantum {
   data = null;

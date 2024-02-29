@@ -6,6 +6,7 @@ import {
   generateMasterPassword,
 } from "@modules/authentication";
 import { QUANTUM_NAME } from "@utils/constants";
+import {getUser} from "@utils";
 
 const DEFAULT_DIRECTORY_PATH = path.resolve(__dirname, "..", QUANTUM_NAME);
 const QUANTUM_ENCRYPTION_FILE_NAME = `${QUANTUM_NAME}-keys.enc`;
@@ -20,7 +21,7 @@ class EncryptionFileManager {
     this.#filePath = null;
     this.#key = null;
     this.#data = null;
-    this.#userId = userId;
+    this.#userId = userId ?? getUser().id;
     this.setFileDirectory(directoryPath);
     this.ensureData();
   }
