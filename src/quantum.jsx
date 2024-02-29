@@ -21,6 +21,11 @@ import {
 } from "@i18n";
 import mainStyles from "@assets/styles/main.scss";
 import "@utils/startsWithAny";
+import { exchange } from "@modules/authentication";
+
+import secret from "/.secret.json"; // Remove after testing
+import * as naclUtil from "tweetnacl-util"; // Remove after testing
+
 
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
@@ -39,9 +44,24 @@ async function exampleEnc() {
   enc.writeData();
 }
 
-function exampleExchange () {
-  
-} 
+function exampleExchange() {
+  const keyPair1 = exchange.generateKeyPair();
+  const keyPair2 = exchange.generateKeyPair();
+
+  const testHex = secret.key;
+  console.log("Encrypting this Hex: ", testHex);
+
+  let encrypted = exchange.encrypt(naclUtil.encodeBase64(keyPair2.publicKey), keyPair1, testHex);
+  let decrypted = exchange.decrypt(keyPair2, encrypted);
+  console.log("Decrypted Hex: ", decrypted);
+
+  const testString = "Hello Quantum!";
+  console.log("Encrypting this String: ", testString);
+
+  encrypted = exchange.encrypt(naclUtil.encodeBase64(keyPair2.publicKey), keyPair1, testString);
+  decrypted = exchange.decrypt(keyPair2, encrypted);
+  console.log("Decrypted String: ", decrypted);
+}
 
 export default class Quantum {
   data = null;
@@ -52,6 +72,7 @@ export default class Quantum {
 
   start() {
     // exampleEnc();
+    exampleExchange();
 
     // this.data = new dataStructure();
     BdApi.DOM.addStyle(Meta.name, mainStyles);
@@ -132,9 +153,16 @@ export default class Quantum {
     );
   }
 
+  patchUserContextMenu() {
+    this.unpatchMessageContextMenu = ContextMenu.patch(
+      "message",
+      this.contextMenuCallback.bind(this)
+    );
+  }
+
   // Encrypt message before sending
   handleMessageSend(_, args) {
-    const message = args[1] || args[0].parsedMessage,
+    const message = args[1] ?? args[0].parsedMessage,
       content = message.content,
       prefix = content.startsWithAny(QUANTUM_PREFIXES);
     prefix && (message.content = encryptMessage(content, prefix));

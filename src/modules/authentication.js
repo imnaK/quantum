@@ -2,10 +2,7 @@ import * as nacl from "tweetnacl";
 import * as naclUtil from "tweetnacl-util";
 import branca from "branca";
 import scryptjs from "scrypt-js";
-
-function generateExchangeKeyPair() {
-  return nacl.box.keyPair();
-}
+import { isBase64 } from "@utils";
 
 async function generateMasterPassword(password, salt) {
   const encoder = new TextEncoder();
@@ -26,37 +23,51 @@ async function generateMasterPassword(password, salt) {
   return new branca(key);
 }
 
-function encrypt(receiverPublicKey, msgParams) {
-  const ephemeralKeyPair = nacl.box.keyPair();
-  const pubKeyUInt8Array = naclUtil.decodeBase64(receiverPublicKey);
-  const msgParamsUInt8Array = naclUtil.decodeUTF8(msgParams);
-  const nonce = nacl.randomBytes(nacl.box.nonceLength);
-  const encryptedMessage = nacl.box(
-    msgParamsUInt8Array,
-    nonce,
-    pubKeyUInt8Array,
-    ephemeralKeyPair.secretKey
-  );
-  return {
-    ciphertext: naclUtil.encodeBase64(encryptedMessage),
-    ephemPubKey: naclUtil.encodeBase64(ephemeralKeyPair.publicKey),
-    nonce: naclUtil.encodeBase64(nonce),
-  };
-}
+const exchange = {
+  generateKeyPair() {
+    return nacl.box.keyPair();
+  },
 
-function decrypt(receiverSecretKey, encryptedData) {
-  const receiverSecretKeyUint8Array = naclUtil.decodeBase64(receiverSecretKey);
-  const nonce = naclUtil.decodeBase64(encryptedData.nonce);
-  const ciphertext = naclUtil.decodeBase64(encryptedData.ciphertext);
-  const ephemPubKey = naclUtil.decodeBase64(encryptedData.ephemPubKey);
-  const decryptedMessage = nacl.box.open(
-    ciphertext,
-    nonce,
-    ephemPubKey,
-    receiverSecretKeyUint8Array
-  );
-  return naclUtil.encodeUTF8(decryptedMessage);
-}
+  // encrypts a payload (utf8 or base64) and outputs a decryptable object
+  encrypt(targetPublicKey, keyPair, payload) {
+    const payloadBytes =
+      (isBase64(payload) && naclUtil.decodeBase64(payload)) ||
+      naclUtil.decodeUTF8(payload);
+    const nonce = nacl.randomBytes(nacl.box.nonceLength);
+    const targetPublicKeyBytes = naclUtil.decodeBase64(targetPublicKey);
+    const encryptedPayload = nacl.box(
+      payloadBytes,
+      nonce,
+      targetPublicKeyBytes,
+      keyPair.secretKey
+    );
+    return {
+      payload: naclUtil.encodeBase64(encryptedPayload),
+      pubKey: naclUtil.encodeBase64(keyPair.publicKey),
+      nonce: naclUtil.encodeBase64(nonce),
+    };
+  },
+
+  // decrypts a payload and outputs the decrypted string (utf8 or base64)
+  decrypt(keyPair, encryptedData) {
+    const secretKeyBytes = keyPair.secretKey;
+    const nonceBytes = naclUtil.decodeBase64(encryptedData.nonce);
+    const payloadBytes = naclUtil.decodeBase64(encryptedData.payload);
+    const pubKeyBytes = naclUtil.decodeBase64(encryptedData.pubKey);
+    const decryptedPayload = nacl.box.open(
+      payloadBytes,
+      nonceBytes,
+      pubKeyBytes,
+      secretKeyBytes
+    );
+
+      try {
+        return naclUtil.encodeUTF8(decryptedPayload);
+      } catch (err) {
+        return naclUtil.encodeBase64(decryptedPayload);
+      }
+  },
+};
 
 function sendChatMessage(content, channelId) {
   Webpack.getModule(
@@ -69,10 +80,4 @@ function sendChatMessage(content, channelId) {
   });
 }
 
-export {
-  generateExchangeKeyPair,
-  generateMasterPassword,
-  encrypt,
-  decrypt,
-  sendChatMessage,
-};
+export { generateMasterPassword, sendChatMessage, exchange };

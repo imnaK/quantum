@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import log4q from "@utils/log4q";
 import {
-  generateExchangeKeyPair,
+  exchange,
   generateMasterPassword,
 } from "@modules/authentication";
 import { QUANTUM_NAME } from "@utils/constants";
@@ -89,7 +89,7 @@ class EncryptionFileManager {
 
   ensureData() {
     if (!this.dataExist()) {
-      const keyPair = generateExchangeKeyPair();
+      const keyPair = exchange.generateKeyPair();
 
       this.#data = {
         channelKeys: {},

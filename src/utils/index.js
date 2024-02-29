@@ -52,3 +52,11 @@ export function getUser() {
   );
   return module.getCurrentUser();
 }
+
+export function isBase64(string) {
+  try {
+    return btoa(atob(string)) == string;
+  } catch (error) {
+    return false;
+  }
+}
