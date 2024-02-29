@@ -14,8 +14,12 @@ function logWithPrefix(consoleFunction, ...args) {
   consoleFunction(...args);
 }
 
-const log = logWithPrefix.bind(null, console.log);
-const warn = logWithPrefix.bind(null, console.warn);
-const error = logWithPrefix.bind(null, console.error);
+const methods = ["log", "warn", "error", "info", "debug"];
+const log4q = {};
 
-export default { log, warn, error };
+for (let method of methods) {
+  console[method] &&
+    (log4q[method] = logWithPrefix.bind(null, console[method]));
+}
+
+export default log4q;
