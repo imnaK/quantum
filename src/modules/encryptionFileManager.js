@@ -82,6 +82,10 @@ class EncryptionFileManager {
   getExchangePublicKey() {
     return this.#data?.exchangeKeyPair.publicKey;
   }
+  
+  getExchangeKeyPair() {
+    return this.#data?.exchangeKeyPair;
+  }
 
   dataExist() {
     return !!this.#data;

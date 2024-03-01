@@ -3,6 +3,9 @@ import * as naclUtil from "tweetnacl-util";
 import branca from "branca";
 import scryptjs from "scrypt-js";
 import { isBase64 } from "@utils";
+import log4q from "@utils/log4q";
+
+const { Webpack } = BdApi;
 
 async function generateMasterPassword(password, salt) {
   const encoder = new TextEncoder();
@@ -61,23 +64,55 @@ const exchange = {
       secretKeyBytes
     );
 
-      try {
-        return naclUtil.encodeUTF8(decryptedPayload);
-      } catch (err) {
-        return naclUtil.encodeBase64(decryptedPayload);
+    try {
+      return naclUtil.encodeUTF8(decryptedPayload);
+    } catch (err) {
+      return naclUtil.encodeBase64(decryptedPayload);
+    }
+  },
+  performInit(event, contextData) {
+    log4q.log("performInit", event, contextData);
+    // let encryptedDataBase64 = btoa(JSON.stringify(encryptedData));
+    const promise = sendMessage(
+      "Initialize is still wip, please [generate](https://github.com/imnaK/quantum?tab=readme-ov-file#getting-started) & share the secret key manually.",
+      contextData.channel.id,
+      (response) => {
+        const channelId = response.body.channel_id,
+          messageId = response.body.id;
+        suppressEmbeds(channelId, messageId);
+        openPrivateChannel(channelId);
       }
+    );
   },
 };
 
-function sendChatMessage(content, channelId) {
-  Webpack.getModule(
+function suppressEmbeds(channelId, messageId) {
+  const module = Webpack.getModule(Webpack.Filters.byKeys("suppressEmbeds"));
+  module.suppressEmbeds(channelId, messageId);
+}
+
+function openPrivateChannel(channelId) {
+  const module = Webpack.getModule(
+    Webpack.Filters.byKeys("openPrivateChannel")
+  );
+  const channel = Webpack.getStore("ChannelStore").getChannel(channelId);
+  module.openPrivateChannel(channel.recipients[0]);
+}
+
+function sendMessage(content, channelId, callback) {
+  const module = Webpack.getModule(
     Webpack.Filters.byKeys("sendMessage", "sendBotMessage")
-  ).sendMessage(channelId, {
+  );
+  const promise = module.sendMessage(channelId, {
     content: content,
     invalidEmojis: [],
     tts: false,
     validNonShortcutEmojis: [],
   });
+  callback && promise.then(callback);
+  promise.catch((error) => {
+    log4q.error("Message couldn't be sent: ", error);
+  });
 }
 
-export { generateMasterPassword, sendChatMessage, exchange };
+export { generateMasterPassword, sendMessage as sendChatMessage, exchange };

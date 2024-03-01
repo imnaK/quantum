@@ -21,11 +21,10 @@ import {
 } from "@i18n";
 import mainStyles from "@assets/styles/main.scss";
 import "@utils/startsWithAny";
-import { exchange } from "@modules/authentication";
+import { exchange, sendChatMessage } from "@modules/authentication";
 
 import secret from "/.secret.json"; // Remove after testing
 import * as naclUtil from "tweetnacl-util"; // Remove after testing
-
 
 const { Patcher, Webpack, ContextMenu } = BdApi;
 
@@ -51,14 +50,22 @@ function exampleExchange() {
   const testHex = secret.key;
   console.log("Encrypting this Hex: ", testHex);
 
-  let encrypted = exchange.encrypt(naclUtil.encodeBase64(keyPair2.publicKey), keyPair1, testHex);
+  let encrypted = exchange.encrypt(
+    naclUtil.encodeBase64(keyPair2.publicKey),
+    keyPair1,
+    testHex
+  );
   let decrypted = exchange.decrypt(keyPair2, encrypted);
   console.log("Decrypted Hex: ", decrypted);
 
   const testString = "Hello Quantum!";
   console.log("Encrypting this String: ", testString);
 
-  encrypted = exchange.encrypt(naclUtil.encodeBase64(keyPair2.publicKey), keyPair1, testString);
+  encrypted = exchange.encrypt(
+    naclUtil.encodeBase64(keyPair2.publicKey),
+    keyPair1,
+    testString
+  );
   decrypted = exchange.decrypt(keyPair2, encrypted);
   console.log("Decrypted String: ", decrypted);
 }
@@ -81,6 +88,7 @@ export default class Quantum {
     this.patchSendMessageAttach();
     this.patchSwitchAccount();
     this.patchMessageContextMenu();
+    this.patchUserContextMenu();
   }
 
   stop() {
@@ -90,6 +98,7 @@ export default class Quantum {
     i18nCleanup();
     Patcher.unpatchAll(QUANTUM_NAME);
     this.unpatchMessageContextMenu();
+    this.unpatchUserContextMenu();
   }
 
   // Catch regular sent messages
@@ -149,14 +158,14 @@ export default class Quantum {
   patchMessageContextMenu() {
     this.unpatchMessageContextMenu = ContextMenu.patch(
       "message",
-      this.contextMenuCallback.bind(this)
+      this.messageContextMenuCallback.bind(this)
     );
   }
 
   patchUserContextMenu() {
-    this.unpatchMessageContextMenu = ContextMenu.patch(
-      "message",
-      this.contextMenuCallback.bind(this)
+    this.unpatchUserContextMenu = ContextMenu.patch(
+      "user-context",
+      this.userContextMenuCallback.bind(this)
     );
   }
 
@@ -177,10 +186,19 @@ export default class Quantum {
     }
   }
 
+  userContextMenuCallback = (tree, contextData) => {
+    const initItem = createContextMenu(
+      ContextMenu,
+      t("request_encryption"),
+      (event) => exchange.performInit(event, contextData)
+    );
+    insertIntoTree(tree, initItem, 7, 2, 0);
+  };
+
   // Create and append decrypt button to message context menu
-  contextMenuCallback = (tree, d) => {
+  messageContextMenuCallback = (tree, contextData) => {
     const messageElement = document.getElementById(
-      "message-content-" + d.message.id
+      "message-content-" + contextData.message.id
     );
     const messageContent = getAllTextOfElement(messageElement);
 
@@ -199,7 +217,7 @@ export default class Quantum {
           t("decrypt_message"),
           performDecryptAction
         );
-        insertIntoTree(tree, 4, decryptItem);
+        insertIntoTree(tree, decryptItem, 2, 4);
       }
       // If the message is already decrypted, add button which shows the original message
       else {
@@ -209,15 +227,21 @@ export default class Quantum {
           t("show_original"),
           performOriginalAction
         );
-        insertIntoTree(tree, 4, originalItem);
+        insertIntoTree(tree, originalItem, 2, 4);
       }
     }
   };
 }
 
-const insertIntoTree = (tree, position, item) => {
-  tree.props.children[2].props.children.splice(position, 0, item);
-};
+function insertIntoTree(tree, item, ...position) {
+  let node = tree;
+
+  for (let i = 0; i < position.length - 1; i++) {
+    node = node.props.children[position[i]];
+  }
+
+  node.props.children.splice(position[position.length - 1], 0, item);
+}
 
 const decryptAction = (messageElement, message, prefix) => (e) => {
   const decryptedMessage = decryptMessage(message, prefix);
