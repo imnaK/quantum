@@ -13,3 +13,6 @@ build
 
 # test files
 .secret.json
+
+# drawio temp files
+.$*.bkp
