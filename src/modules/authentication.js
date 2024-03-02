@@ -45,31 +45,28 @@ const exchange = {
       keyPair.secretKey
     );
     return {
-      payload: naclUtil.encodeBase64(encryptedPayload),
-      pubKey: naclUtil.encodeBase64(keyPair.publicKey),
-      nonce: naclUtil.encodeBase64(nonce),
+      payload: encryptedPayload,
+      pubKey: keyPair.publicKey,
+      nonce: nonce,
     };
   },
 
   // decrypts a payload and outputs the decrypted string (utf8 or base64)
   decrypt(keyPair, encryptedData) {
-    const secretKeyBytes = keyPair.secretKey;
-    const nonceBytes = naclUtil.decodeBase64(encryptedData.nonce);
-    const payloadBytes = naclUtil.decodeBase64(encryptedData.payload);
-    const pubKeyBytes = naclUtil.decodeBase64(encryptedData.pubKey);
     const decryptedPayload = nacl.box.open(
-      payloadBytes,
-      nonceBytes,
-      pubKeyBytes,
-      secretKeyBytes
+      encryptedData.payload,
+      encryptedData.nonce,
+      encryptedData.pubKey,
+      keyPair.secretKey
     );
 
     try {
       return naclUtil.encodeUTF8(decryptedPayload);
-    } catch (err) {
+    } catch {
       return naclUtil.encodeBase64(decryptedPayload);
     }
   },
+
   performInit(event, contextData) {
     log4q.log("performInit", event, contextData);
     // let encryptedDataBase64 = btoa(JSON.stringify(encryptedData));
@@ -79,19 +76,19 @@ const exchange = {
       (response) => {
         const channelId = response.body.channel_id,
           messageId = response.body.id;
-        suppressEmbeds(channelId, messageId);
-        openPrivateChannel(channelId);
+        removeEmbeds(channelId, messageId);
+        openChannel(channelId);
       }
     );
   },
 };
 
-function suppressEmbeds(channelId, messageId) {
+function removeEmbeds(channelId, messageId) {
   const module = Webpack.getModule(Webpack.Filters.byKeys("suppressEmbeds"));
   module.suppressEmbeds(channelId, messageId);
 }
 
-function openPrivateChannel(channelId) {
+function openChannel(channelId) {
   const module = Webpack.getModule(
     Webpack.Filters.byKeys("openPrivateChannel")
   );
