@@ -20,7 +20,7 @@ import {
   translate as t,
 } from "@i18n";
 import mainStyles from "@assets/styles/main.scss";
-import "@utils/startsWithAny";
+import "@utils/getQuantumMessage";
 import { exchange } from "@modules/authentication";
 
 import secret from "/.secret.json"; // Remove after testing
@@ -78,7 +78,7 @@ export default class Quantum {
   }
 
   start() {
-    // exampleEnc();
+    exampleEnc();
     // exampleExchange();
 
     // this.data = new dataStructure();
@@ -173,24 +173,25 @@ export default class Quantum {
   handleMessageSend(_, args) {
     const message = args[1] ?? args[0].parsedMessage,
       content = message.content,
-      prefix = content.startsWithAny(QUANTUM_PREFIXES);
-    prefix && (message.content = encryptMessage(content, prefix));
+      quantumMessage = content.getQuantumMessage();
+      quantumMessage.prefix && !quantumMessage.task && (message.content = encryptMessage(content, quantumMessage.prefix));
   }
 
   handleMessageAttachCancel(_, args) {
-    const content = args[0].draftContent;
-    const prefix = content.startsWithAny(QUANTUM_PREFIXES);
-    if (prefix) {
-      const decryptedText = decryptMessage(content, prefix);
-      args[0].draftContent = prefix + decryptedText;
+    const content = args[0].draftContent,
+    quantumMessage = content.getQuantumMessage();
+    if (quantumMessage.prefix  && !quantumMessage.task ) {
+      const decryptedText = decryptMessage(content, quantumMessage.prefix);
+      args[0].draftContent = quantumMessage.prefix + decryptedText;
     }
   }
 
   userContextMenuCallback = (tree, contextData) => {
+    const keyPair = enc.getExchangeKeyPair();
     const initItem = createContextMenu(
       ContextMenu,
       t("request_encryption"),
-      (event) => exchange.performInit(event, contextData)
+      (event) => exchange.performInit(event, contextData, keyPair)
     );
     insertIntoTree(tree, initItem, 7, 2, 0);
   };
@@ -203,31 +204,42 @@ export default class Quantum {
     const messageContent = getAllTextOfElement(messageElement);
 
     // Checks if it's a Quantum message
-    const prefix = messageContent.startsWithAny(QUANTUM_PREFIXES);
-    if (prefix) {
-      // Checks if the message is encrypted, then adds a decrypt button
-      if (messageElement.querySelector(`.${QUANTUM_CLASS}`) === null) {
-        const performDecryptAction = decryptAction(
-          messageElement,
-          messageContent,
-          prefix
-        );
-        const decryptItem = createContextMenu(
+    const quantumMessage = messageContent.getQuantumMessage();
+    if (quantumMessage) {
+      if (!quantumMessage.task) {
+        // Checks if the message is encrypted, then adds a decrypt button
+        if (messageElement.querySelector(`.${QUANTUM_CLASS}`) === null) {
+          const performDecryptAction = decryptAction(
+            messageElement,
+            messageContent,
+            quantumMessage.prefix
+          );
+          const decryptItem = createContextMenu(
+            ContextMenu,
+            t("decrypt_message"),
+            performDecryptAction
+          );
+          insertIntoTree(tree, decryptItem, 2, 4);
+        }
+        // If the message is already decrypted, add button which shows the original message
+        else {
+          const performOriginalAction = originalAction(messageElement);
+          const originalItem = createContextMenu(
+            ContextMenu,
+            t("show_original"),
+            performOriginalAction
+          );
+          insertIntoTree(tree, originalItem, 2, 4);
+        }
+      } else if (quantumMessage.task === "request") {
+        const acceptItem = createContextMenu(
           ContextMenu,
-          t("decrypt_message"),
-          performDecryptAction
+          t("accept_request"),
+          () => {
+            console.log("Accepting request: ", quantumMessage);
+          }
         );
-        insertIntoTree(tree, decryptItem, 2, 4);
-      }
-      // If the message is already decrypted, add button which shows the original message
-      else {
-        const performOriginalAction = originalAction(messageElement);
-        const originalItem = createContextMenu(
-          ContextMenu,
-          t("show_original"),
-          performOriginalAction
-        );
-        insertIntoTree(tree, originalItem, 2, 4);
+        insertIntoTree(tree, acceptItem, 2, 4);
       }
     }
   };

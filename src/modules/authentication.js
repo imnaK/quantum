@@ -6,7 +6,6 @@ import { isBase64 } from "@utils";
 import log4q from "@utils/log4q";
 import { encode, decode } from "@msgpack/msgpack";
 
-const { BSON } = require("bson"); // Doesn't work with import 😕
 const { Webpack } = BdApi;
 
 async function generateMasterPassword(password, salt) {
@@ -33,6 +32,8 @@ const exchange = {
   ACK: 0x06,
   NAK: 0x15,
   CAN: 0x18,
+
+  TASKS: ["request"],
 
   generateKeyPair() {
     return nacl.box.keyPair();
@@ -74,29 +75,22 @@ const exchange = {
     }
   },
 
-  performInit(event, contextData) {
-    let key = new Uint8Array(32);
-    window.crypto.getRandomValues(key);
-    const testObject = { flag: this.ENQ, key: key };
-    log4q.log("Test Object: ", testObject);
-    sendExchangePacketBSON(
+  performInit(event, contextData, keyPair) {
+    const testObject = { flag: this.ENQ, key: keyPair.publicKey };
+    log4q.log("request", testObject);
+    sendExchangePacket(
       contextData.channel.id,
       testObject,
-      "object serialized with BSON: "
-    );
-    sendExchangePacketMsgPack(
-      contextData.channel.id,
-      testObject,
-      "object serialized with MessagePack: "
+      "q:request\n"
     );
   },
 };
 
-function sendExchangePacketBSON(channelId, object, prefix) {
-  const functionName = sendExchangePacketBSON.name;
+function sendExchangePacket(channelId, object, prefix) {
+  const functionName = sendExchangePacket.name;
   log4q.log("%c" + functionName, "color: hotpink; font-weight: bolder;");
 
-  const binary = log4q.printExecutionTime(() => BSON.serialize(object));
+  const binary = log4q.printExecutionTime(() => encode(object));
 
   const base64 = naclUtil.encodeBase64(binary);
 
@@ -108,33 +102,13 @@ function sendExchangePacketBSON(channelId, object, prefix) {
       removeEmbeds(channelId, messageId);
       openChannel(channelId);
     }
-  );
-
-  log4q.log(
-    "decoded & deserialized data: ",
-    BSON.deserialize(naclUtil.decodeBase64(base64))
   );
 }
 
-function sendExchangePacketMsgPack(channelId, object, prefix) {
-  const functionName = sendExchangePacketMsgPack.name;
-  log4q.log("%c" + functionName, "color: hotpink; font-weight: bolder;");
-
-  const binary = log4q.printExecutionTime(() => encode(object), functionName);
-
-  const base64 = naclUtil.encodeBase64(binary);
-
-  const promise = sendMessage(
-    (prefix ?? "") + base64,
-    channelId,
-    (response) => {
-      const messageId = response.body.id;
-      removeEmbeds(channelId, messageId);
-      openChannel(channelId);
-    }
-  );
-
-  log4q.log("decoded & unpacked data: ", decode(naclUtil.decodeBase64(base64)));
+function randomBytes(length) {
+  let key = new Uint8Array(length);
+  window.crypto.getRandomValues(key);
+  return key;
 }
 
 function removeEmbeds(channelId, messageId) {
@@ -166,4 +140,4 @@ function sendMessage(content, channelId, callback) {
   });
 }
 
-export { generateMasterPassword, sendMessage as sendChatMessage, exchange };
+export { generateMasterPassword, sendMessage, exchange };
