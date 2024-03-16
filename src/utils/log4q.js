@@ -18,4 +18,14 @@ const log = logWithPrefix.bind(null, console.log);
 const warn = logWithPrefix.bind(null, console.warn);
 const error = logWithPrefix.bind(null, console.error);
 
-export default { log, warn, error };
+function printExecutionTime(aFunction, label = "execution time") {
+  console.time(label);
+
+  const result = aFunction();
+
+  console.timeEnd(label);
+
+  return result;
+}
+
+export default { log, warn, error, printExecutionTime };

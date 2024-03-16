@@ -21,7 +21,7 @@ import {
 } from "@i18n";
 import mainStyles from "@assets/styles/main.scss";
 import "@utils/startsWithAny";
-import { exchange, sendChatMessage } from "@modules/authentication";
+import { exchange } from "@modules/authentication";
 
 import secret from "/.secret.json"; // Remove after testing
 import * as naclUtil from "tweetnacl-util"; // Remove after testing
@@ -79,7 +79,7 @@ export default class Quantum {
 
   start() {
     // exampleEnc();
-    exampleExchange();
+    // exampleExchange();
 
     // this.data = new dataStructure();
     BdApi.DOM.addStyle(Meta.name, mainStyles);

@@ -4,7 +4,9 @@ import branca from "branca";
 import scryptjs from "scrypt-js";
 import { isBase64 } from "@utils";
 import log4q from "@utils/log4q";
+import { encode, decode } from "@msgpack/msgpack";
 
+const { BSON } = require("bson"); // Doesn't work with import 😕
 const { Webpack } = BdApi;
 
 async function generateMasterPassword(password, salt) {
@@ -27,6 +29,11 @@ async function generateMasterPassword(password, salt) {
 }
 
 const exchange = {
+  ENQ: 0x05,
+  ACK: 0x06,
+  NAK: 0x15,
+  CAN: 0x18,
+
   generateKeyPair() {
     return nacl.box.keyPair();
   },
@@ -68,20 +75,67 @@ const exchange = {
   },
 
   performInit(event, contextData) {
-    log4q.log("performInit", event, contextData);
-    // let encryptedDataBase64 = btoa(JSON.stringify(encryptedData));
-    const promise = sendMessage(
-      "Initialize is still wip, please [generate](https://github.com/imnaK/quantum?tab=readme-ov-file#getting-started) & share the secret key manually.",
+    let key = new Uint8Array(32);
+    window.crypto.getRandomValues(key);
+    const testObject = { flag: this.ENQ, key: key };
+    log4q.log("Test Object: ", testObject);
+    sendExchangePacketBSON(
       contextData.channel.id,
-      (response) => {
-        const channelId = response.body.channel_id,
-          messageId = response.body.id;
-        removeEmbeds(channelId, messageId);
-        openChannel(channelId);
-      }
+      testObject,
+      "object serialized with BSON: "
+    );
+    sendExchangePacketMsgPack(
+      contextData.channel.id,
+      testObject,
+      "object serialized with MessagePack: "
     );
   },
 };
+
+function sendExchangePacketBSON(channelId, object, prefix) {
+  const functionName = sendExchangePacketBSON.name;
+  log4q.log("%c" + functionName, "color: hotpink; font-weight: bolder;");
+
+  const binary = log4q.printExecutionTime(() => BSON.serialize(object));
+
+  const base64 = naclUtil.encodeBase64(binary);
+
+  const promise = sendMessage(
+    (prefix ?? "") + base64,
+    channelId,
+    (response) => {
+      const messageId = response.body.id;
+      removeEmbeds(channelId, messageId);
+      openChannel(channelId);
+    }
+  );
+
+  log4q.log(
+    "decoded & deserialized data: ",
+    BSON.deserialize(naclUtil.decodeBase64(base64))
+  );
+}
+
+function sendExchangePacketMsgPack(channelId, object, prefix) {
+  const functionName = sendExchangePacketMsgPack.name;
+  log4q.log("%c" + functionName, "color: hotpink; font-weight: bolder;");
+
+  const binary = log4q.printExecutionTime(() => encode(object), functionName);
+
+  const base64 = naclUtil.encodeBase64(binary);
+
+  const promise = sendMessage(
+    (prefix ?? "") + base64,
+    channelId,
+    (response) => {
+      const messageId = response.body.id;
+      removeEmbeds(channelId, messageId);
+      openChannel(channelId);
+    }
+  );
+
+  log4q.log("decoded & unpacked data: ", decode(naclUtil.decodeBase64(base64)));
+}
 
 function removeEmbeds(channelId, messageId) {
   const module = Webpack.getModule(Webpack.Filters.byKeys("suppressEmbeds"));
