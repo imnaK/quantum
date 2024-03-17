@@ -88,17 +88,12 @@ class EncryptionFileManager {
 
   ensureData() {
     if (!this.dataExist()) {
-      const keyPair = generateExchangeKeyPair();
-
       this.#data = {
         channelKeys: {},
-        exchangeKeyPair: {
-          secretKey: keyPair.secretKey,
-          publicKey: keyPair.publicKey,
-        },
+        exchangeKeyPair: generateExchangeKeyPair(),
       };
 
-      log4q.log("%cThe data model got (re-)initialized.", "color: yellow;"); // TODO: Remove this log after testing
+      log4q.log("%cThe data model got (re-)initialized.", "color: yellow;");
     }
   }
 
@@ -107,6 +102,7 @@ class EncryptionFileManager {
       log4q.error("No data to write.");
       return;
     }
+
     try {
       const encrypted = this.#key.encode(JSON.stringify(this.#data));
       fs.writeFileSync(this.#filePath, encrypted, "utf8");
