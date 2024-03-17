@@ -3,10 +3,7 @@ import log4q from "@utils/log4q";
 import Meta from "@meta";
 import enc from "@modules/encryptionFileManager";
 import { encryptMessage, decryptMessage } from "@modules/encryption";
-import {
-  QUANTUM_CLASS,
-  QUANTUM_NAME,
-} from "@utils/constants";
+import { QUANTUM_CLASS, QUANTUM_NAME } from "@utils/constants";
 import {
   getAllTextOfElement,
   createContextMenu,
@@ -173,13 +170,15 @@ export default class Quantum {
     const message = args[1] ?? args[0].parsedMessage,
       content = message.content,
       quantumMessage = content.getQuantumMessage();
-      quantumMessage.prefix && !quantumMessage.task && (message.content = encryptMessage(content, quantumMessage.prefix));
+    quantumMessage.prefix &&
+      !quantumMessage.task &&
+      (message.content = encryptMessage(content, quantumMessage.prefix));
   }
 
   handleMessageAttachCancel(_, args) {
     const content = args[0].draftContent,
-    quantumMessage = content.getQuantumMessage();
-    if (quantumMessage.prefix  && !quantumMessage.task ) {
+      quantumMessage = content.getQuantumMessage();
+    if (quantumMessage.prefix && !quantumMessage.task) {
       const decryptedText = decryptMessage(content, quantumMessage.prefix);
       args[0].draftContent = quantumMessage.prefix + decryptedText;
     }
@@ -187,11 +186,11 @@ export default class Quantum {
 
   userContextMenuCallback = (tree, contextData) => {
     const publicKey = enc.getExchangePublicKey(),
-    initItem = createContextMenu(
-      ContextMenu,
-      t("request_encryption"),
-      (event) => exchange.performInit(event, contextData, publicKey)
-    );
+      initItem = createContextMenu(
+        ContextMenu,
+        t("request_encryption"),
+        (event) => exchange.performInit(event, contextData, publicKey)
+      );
     insertIntoTree(tree, initItem, 7, 2, 0);
   };
 

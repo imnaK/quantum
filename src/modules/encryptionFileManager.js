@@ -1,12 +1,9 @@
 import fs from "fs";
 import path from "path";
 import log4q from "@utils/log4q";
-import {
-  exchange,
-  generateMasterPassword,
-} from "@modules/authentication";
+import { exchange, generateMasterPassword } from "@modules/authentication";
 import { QUANTUM_NAME } from "@utils/constants";
-import {getUser} from "@utils";
+import { getUser } from "@utils";
 
 const DEFAULT_DIRECTORY_PATH = path.resolve(__dirname, "..", QUANTUM_NAME);
 const QUANTUM_ENCRYPTION_FILE_NAME = `${QUANTUM_NAME}-keys.enc`;
@@ -82,7 +79,7 @@ class EncryptionFileManager {
   getExchangePublicKey() {
     return this.#data?.exchangeKeyPair.publicKey;
   }
-  
+
   getExchangeKeyPair() {
     return this.#data?.exchangeKeyPair;
   }
@@ -93,17 +90,12 @@ class EncryptionFileManager {
 
   ensureData() {
     if (!this.dataExist()) {
-      const keyPair = exchange.generateKeyPair();
-
       this.#data = {
         channelKeys: {},
-        exchangeKeyPair: {
-          secretKey: keyPair.secretKey,
-          publicKey: keyPair.publicKey,
-        },
+        exchangeKeyPair: exchange.generateKeyPair(),
       };
 
-      log4q.log("%cThe data model got (re-)initialized.", "color: yellow;"); // TODO: Remove this log after testing
+      log4q.log("%cThe data model got (re-)initialized.", "color: yellow;");
     }
   }
 
@@ -112,6 +104,7 @@ class EncryptionFileManager {
       log4q.error("No data to write.");
       return;
     }
+
     try {
       const encrypted = this.#key.encode(JSON.stringify(this.#data));
       fs.writeFileSync(this.#filePath, encrypted, "utf8");

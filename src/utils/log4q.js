@@ -14,18 +14,22 @@ function logWithPrefix(consoleFunction, ...args) {
   consoleFunction(...args);
 }
 
-const log = logWithPrefix.bind(null, console.log);
-const warn = logWithPrefix.bind(null, console.warn);
-const error = logWithPrefix.bind(null, console.error);
-
-function printExecutionTime(aFunction, label = "execution time") {
+function printExecutionTime(func, label = "execution time") {
   console.time(label);
-
-  const result = aFunction();
-
+  const result = func();
   console.timeEnd(label);
 
   return result;
 }
 
-export default { log, warn, error, printExecutionTime };
+// Log methods like console.log, console.warn, etc. but for Quantum: log4q.log, log4q.warn, etc.
+const logMethods = ["log", "warn", "error", "info", "debug"];
+
+// Create an object with the log methods and bind the logWithPrefix function to each one
+export default Object.fromEntries([
+  ...logMethods.map((method) => [
+    method,
+    console[method] && logWithPrefix.bind(null, console[method]),
+  ]),
+  ["printExecutionTime", printExecutionTime],
+]);
