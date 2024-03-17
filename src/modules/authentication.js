@@ -75,8 +75,8 @@ const exchange = {
     }
   },
 
-  performInit(event, contextData, keyPair) {
-    const testObject = { flag: this.ENQ, key: keyPair.publicKey };
+  performInit(event, contextData, publicKey) {
+    const testObject = { flag: this.ENQ, key: publicKey };
     log4q.log("request", testObject);
     sendExchangePacket(
       contextData.channel.id,
@@ -84,6 +84,12 @@ const exchange = {
       "q:request\n"
     );
   },
+
+  handleRequest(quantumMessage, enc, contextData) {
+    const channelId = contextData.message.channel_id;
+    console.log("Accepting request: ", quantumMessage, enc, contextData);
+    // randomBytes(32);
+  }
 };
 
 function sendExchangePacket(channelId, object, prefix) {

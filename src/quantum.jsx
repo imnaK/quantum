@@ -4,7 +4,6 @@ import Meta from "@meta";
 import enc from "@modules/encryptionFileManager";
 import { encryptMessage, decryptMessage } from "@modules/encryption";
 import {
-  QUANTUM_PREFIXES,
   QUANTUM_CLASS,
   QUANTUM_NAME,
 } from "@utils/constants";
@@ -187,11 +186,11 @@ export default class Quantum {
   }
 
   userContextMenuCallback = (tree, contextData) => {
-    const keyPair = enc.getExchangeKeyPair();
-    const initItem = createContextMenu(
+    const publicKey = enc.getExchangePublicKey(),
+    initItem = createContextMenu(
       ContextMenu,
       t("request_encryption"),
-      (event) => exchange.performInit(event, contextData, keyPair)
+      (event) => exchange.performInit(event, contextData, publicKey)
     );
     insertIntoTree(tree, initItem, 7, 2, 0);
   };
@@ -235,8 +234,8 @@ export default class Quantum {
         const acceptItem = createContextMenu(
           ContextMenu,
           t("accept_request"),
-          () => {
-            console.log("Accepting request: ", quantumMessage);
+          (...args) => {
+            exchange.handleRequest(quantumMessage, enc, contextData);
           }
         );
         insertIntoTree(tree, acceptItem, 2, 4);
