@@ -4,6 +4,7 @@ import log4q from "@utils/log4q";
 import { exchange, generateMasterPassword } from "@modules/authentication";
 import { QUANTUM_NAME } from "@utils/constants";
 import { getUser } from "@utils";
+import * as msgpack from "@msgpack/msgpack";
 
 const DEFAULT_DIRECTORY_PATH = path.resolve(__dirname, "..", QUANTUM_NAME);
 const QUANTUM_ENCRYPTION_FILE_NAME = `${QUANTUM_NAME}-keys.enc`;
@@ -32,9 +33,12 @@ class EncryptionFileManager {
 
   setFileDirectory(directoryPath = DEFAULT_DIRECTORY_PATH) {
     log4q.log("Setting the file directory to:", directoryPath);
+    // Check if directory exists or create it if default directory
     if (
-      fs.existsSync(directoryPath) &&
-      fs.lstatSync(directoryPath).isDirectory()
+      (fs.existsSync(directoryPath) &&
+        fs.lstatSync(directoryPath).isDirectory()) ||
+      (directoryPath === DEFAULT_DIRECTORY_PATH &&
+        (fs.mkdirSync(directoryPath) || true))
     ) {
       const fileName = `${this.#userId}-${QUANTUM_ENCRYPTION_FILE_NAME}`;
       this.#filePath = path.join(directoryPath, fileName);
@@ -104,9 +108,8 @@ class EncryptionFileManager {
       log4q.error("No data to write.");
       return;
     }
-
     try {
-      const encrypted = this.#key.encode(JSON.stringify(this.#data));
+      const encrypted = this.#key.encode(msgpack.encode(this.#data));
       fs.writeFileSync(this.#filePath, encrypted, "utf8");
     } catch (error) {
       log4q.error("The file could not be written.", error);
@@ -117,11 +120,14 @@ class EncryptionFileManager {
     if (this.fileExists()) {
       try {
         const encryptedData = fs.readFileSync(this.#filePath, "utf8");
-        const decrypted = this.#key.decode(encryptedData);
         try {
-          this.#data = JSON.parse(decrypted.toString());
+          const decryptedData = this.#key.decode(encryptedData);
+          this.#data = msgpack.decode(decryptedData);
         } catch (error) {
-          log4q.error("The decrypted data is not valid JSON.", error);
+          log4q.error(
+            `The data couldn't be decoded!\nCheck if "${this.#filePath}" is still JSON, this version uses MessagePack.\n`,
+            error
+          );
         }
       } catch (error) {
         log4q.error("The file could not be read.", error);
