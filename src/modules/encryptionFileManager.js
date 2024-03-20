@@ -72,7 +72,7 @@ class EncryptionFileManager {
   }
 
   setChannelKey(channelId, channelKey) {
-    if (dataExist()) {
+    if (this.dataExist()) {
       this.#data.channelKeys[channelId] = channelKey;
       this.writeData();
     }
