@@ -35,16 +35,15 @@ class EncryptionFileManager {
     log4q.log("Setting the file directory to:", directoryPath);
     // Check if directory exists or create it if default directory
     if (
-      (fs.existsSync(directoryPath) &&
-        fs.lstatSync(directoryPath).isDirectory()) ||
-      (directoryPath === DEFAULT_DIRECTORY_PATH &&
-        (fs.mkdirSync(directoryPath) || true))
+      !(
+        fs.existsSync(directoryPath) &&
+        fs.lstatSync(directoryPath).isDirectory()
+      )
     ) {
-      const fileName = `${this.#userId}-${QUANTUM_ENCRYPTION_FILE_NAME}`;
-      this.#filePath = path.join(directoryPath, fileName);
-    } else {
-      log4q.error("The provided path is not a valid directory:", directoryPath);
+      fs.mkdirSync(directoryPath, { recursive: true });
     }
+    const fileName = `${this.#userId}-${QUANTUM_ENCRYPTION_FILE_NAME}`;
+    this.#filePath = path.join(directoryPath, fileName);
   }
 
   getFilePath() {
