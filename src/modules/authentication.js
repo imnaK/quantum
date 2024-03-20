@@ -5,6 +5,7 @@ import scryptjs from "scrypt-js";
 import { isBase64 } from "@utils";
 import log4q from "@utils/log4q";
 import { encode, decode } from "@msgpack/msgpack";
+import { QUANTUM_PREFIXES } from "@utils/constants";
 
 const { Webpack } = BdApi;
 
@@ -33,7 +34,7 @@ const exchange = {
   NAK: 0x15,
   CAN: 0x18,
 
-  TASKS: ["request"],
+  TASKS: ["request", "response", "acknowledge", "cancel"],
 
   generateKeyPair() {
     return nacl.box.keyPair();
@@ -41,15 +42,11 @@ const exchange = {
 
   // encrypts a payload (utf8 or base64) and outputs a decryptable object
   encrypt(targetPublicKey, keyPair, payload) {
-    const payloadBytes =
-      (isBase64(payload) && naclUtil.decodeBase64(payload)) ||
-      naclUtil.decodeUTF8(payload);
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
-    const targetPublicKeyBytes = naclUtil.decodeBase64(targetPublicKey);
     const encryptedPayload = nacl.box(
-      payloadBytes,
+      payload,
       nonce,
-      targetPublicKeyBytes,
+      targetPublicKey,
       keyPair.secretKey
     );
     return {
@@ -61,54 +58,48 @@ const exchange = {
 
   // decrypts a payload and outputs the decrypted string (utf8 or base64)
   decrypt(keyPair, encryptedData) {
-    const decryptedPayload = nacl.box.open(
+    return nacl.box.open(
       encryptedData.payload,
       encryptedData.nonce,
       encryptedData.pubKey,
       keyPair.secretKey
     );
-
-    try {
-      return naclUtil.encodeUTF8(decryptedPayload);
-    } catch {
-      return naclUtil.encodeBase64(decryptedPayload);
-    }
   },
 
   performInit(event, contextData, publicKey) {
-    const testObject = { flag: this.ENQ, key: publicKey };
-    log4q.log("request", testObject);
-    sendExchangePacket(
-      contextData.channel.id,
-      testObject,
-      "q:request\n"
-    );
+    const enquiry = { flag: this.ENQ, publicKey: publicKey };
+    log4q.log("Public Key: ", publicKey);
+    sendExchangePacket(contextData.channel.id, enquiry, this.TASKS[0]);
   },
 
   handleRequest(quantumMessage, enc, contextData) {
     const channelId = contextData.message.channel_id;
-    console.log("Accepting request: ", quantumMessage, enc, contextData);
-    // randomBytes(32);
-  }
+    const keyPair = enc.getExchangeKeyPair();
+    const receivedObject = decode(naclUtil.decodeBase64(quantumMessage.content));
+    const chatKey = randomBytes(32);
+
+    enc.setChannelKey(channelId, chatKey);
+
+    const encryptedChatKey = exchange.encrypt(
+      receivedObject.publicKey,
+      keyPair,
+      chatKey
+    );
+    const response = { flag: this.ACK, chatKey: encryptedChatKey };
+    sendExchangePacket(channelId, response, this.TASKS[1]);
+  },
 };
 
-function sendExchangePacket(channelId, object, prefix) {
-  const functionName = sendExchangePacket.name;
-  log4q.log("%c" + functionName, "color: hotpink; font-weight: bolder;");
+function sendExchangePacket(channelId, object, task) {
+  const identifier = QUANTUM_PREFIXES[0] + (task ?? "object") + "\n";
 
-  const binary = log4q.printExecutionTime(() => encode(object));
-
+  const binary = encode(object);
   const base64 = naclUtil.encodeBase64(binary);
-
-  const promise = sendMessage(
-    (prefix ?? "") + base64,
-    channelId,
-    (response) => {
-      const messageId = response.body.id;
-      removeEmbeds(channelId, messageId);
-      openChannel(channelId);
-    }
-  );
+  sendMessage(identifier + base64, channelId, (response) => {
+    const messageId = response.body.id;
+    removeEmbeds(channelId, messageId);
+    openChannel(channelId);
+  });
 }
 
 function randomBytes(length) {
