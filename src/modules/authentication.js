@@ -74,7 +74,9 @@ const exchange = {
   handleRequest(quantumMessage, enc, contextData) {
     const channelId = contextData.message.channel_id;
     const keyPair = enc.getExchangeKeyPair();
-    const receivedObject = decode(naclUtil.decodeBase64(quantumMessage.content));
+    const receivedObject = decode(
+      naclUtil.decodeBase64(quantumMessage.content)
+    );
     const chatKey = randomBytes(32);
 
     enc.setChannelKey(channelId, chatKey);
@@ -86,6 +88,10 @@ const exchange = {
     );
     const response = { flag: this.ACK, chatKey: encryptedChatKey };
     sendExchangePacket(channelId, response, this.TASKS[1]);
+  },
+
+  handleAcceptKey(quantumMessage, enc, contextData) {
+    log4q.log("Accepting key:\n", quantumMessage, enc, contextData);
   },
 };
 

@@ -202,6 +202,7 @@ export default class Quantum {
 
     // Checks if it's a Quantum message
     const quantumMessage = messageContent.getQuantumMessage();
+
     if (quantumMessage) {
       if (!quantumMessage.task) {
         // Checks if the message is encrypted, then adds a decrypt button
@@ -228,15 +229,34 @@ export default class Quantum {
           );
           insertIntoTree(tree, originalItem, 2, 4);
         }
-      } else if (quantumMessage.task === "request" && contextData.message.author.id !== getUser().id) {
-        const acceptItem = createContextMenu(
-          ContextMenu,
-          t("accept_request"),
-          () => {
-            exchange.handleRequest(quantumMessage, enc, contextData);
+      } else if (
+        quantumMessage.task &&
+        contextData.message.author.id !== getUser().id
+      ) {
+        switch (quantumMessage.task) {
+          case "request": {
+            const acceptItem = createContextMenu(
+              ContextMenu,
+              t("accept_request"),
+              () => {
+                exchange.handleRequest(quantumMessage, enc, contextData);
+              }
+            );
+            insertIntoTree(tree, acceptItem, 2, 4);
+            break;
           }
-        );
-        insertIntoTree(tree, acceptItem, 2, 4);
+          case "response": {
+            const acceptItem = createContextMenu(
+              ContextMenu,
+              t("accept_key"),
+              () => {
+                exchange.handleAcceptKey(quantumMessage, enc, contextData);
+              }
+            );
+            insertIntoTree(tree, acceptItem, 2, 4);
+            break;
+          }
+        }
       }
     }
   };
