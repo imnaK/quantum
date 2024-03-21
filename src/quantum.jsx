@@ -9,6 +9,7 @@ import {
   createContextMenu,
   modifyElements,
   createSpan,
+  getUser,
 } from "@utils";
 import {
   init as i18nInit,
@@ -227,11 +228,11 @@ export default class Quantum {
           );
           insertIntoTree(tree, originalItem, 2, 4);
         }
-      } else if (quantumMessage.task === "request") {
+      } else if (quantumMessage.task === "request" && contextData.message.author.id !== getUser().id) {
         const acceptItem = createContextMenu(
           ContextMenu,
           t("accept_request"),
-          (...args) => {
+          () => {
             exchange.handleRequest(quantumMessage, enc, contextData);
           }
         );
