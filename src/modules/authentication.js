@@ -68,7 +68,6 @@ const exchange = {
 
   performInit(event, contextData, publicKey) {
     const enquiry = { flag: this.ENQ, publicKey: publicKey };
-    log4q.log("Public Key: ", publicKey);
     sendExchangePacket(contextData.channel.id, enquiry, this.TASKS[0]);
   },
 
