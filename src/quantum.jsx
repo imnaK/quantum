@@ -30,10 +30,6 @@ async function exampleEnc() {
   await enc.setMasterPassword("mypassword");
   enc.readData();
 
-  // set channel keys
-  enc.setChannelKey("231692919638065153", "sec-ret-key-yam");
-  enc.setChannelKey("446683526226509827", "sec-ret-key-haz");
-
   // output data and write to file
   enc.printData();
   enc.writeData();
@@ -185,13 +181,13 @@ export default class Quantum {
   }
 
   userContextMenuCallback = (tree, contextData) => {
-    const publicKey = enc.getExchangePublicKey(),
-      initItem = createContextMenu(
-        ContextMenu,
-        t("request_encryption"),
-        (event) => exchange.performInit(event, contextData, publicKey)
-      );
-    insertIntoTree(tree, initItem, 7, 2, 0);
+      const publicKey = enc.getExchangePublicKey(),
+        initItem = createContextMenu(
+          ContextMenu,
+          t("request_encryption"),
+          (event) => exchange.performInit(event, contextData, publicKey)
+        );
+      insertIntoTree(tree, initItem, 7, 2, 0);
   };
 
   // Create and append decrypt button to message context menu
