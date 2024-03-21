@@ -181,6 +181,7 @@ export default class Quantum {
   }
 
   userContextMenuCallback = (tree, contextData) => {
+    if (!contextData?.guildId) {
       const publicKey = enc.getExchangePublicKey(),
         initItem = createContextMenu(
           ContextMenu,
@@ -188,6 +189,7 @@ export default class Quantum {
           (event) => exchange.performInit(event, contextData, publicKey)
         );
       insertIntoTree(tree, initItem, 7, 2, 0);
+    }
   };
 
   // Create and append decrypt button to message context menu
