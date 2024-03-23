@@ -4,7 +4,7 @@ import branca from "branca";
 import scryptjs from "scrypt-js";
 import { isBase64 } from "@utils";
 import log4q from "@utils/log4q";
-import { encode, decode } from "@msgpack/msgpack";
+import * as msgpack from "@msgpack/msgpack";
 import { QUANTUM_PREFIXES } from "@utils/constants";
 
 const { Webpack } = BdApi;
@@ -74,7 +74,7 @@ const exchange = {
   handleRequest(quantumMessage, enc, contextData) {
     const channelId = contextData.message.channel_id;
     const keyPair = enc.getExchangeKeyPair();
-    const receivedObject = decode(
+    const receivedObject = msgpack.decode(
       naclUtil.decodeBase64(quantumMessage.content)
     );
     const chatKey = randomBytes(32);
@@ -98,7 +98,7 @@ const exchange = {
 function sendExchangePacket(channelId, object, task) {
   const identifier = QUANTUM_PREFIXES[0] + (task ?? "object") + "\n";
 
-  const binary = encode(object);
+  const binary = msgpack.encode(object);
   const base64 = naclUtil.encodeBase64(binary);
   sendMessage(identifier + base64, channelId, (response) => {
     const messageId = response.body.id;
