@@ -71,6 +71,7 @@ const exchange = {
     sendExchangePacket(contextData.channel.id, enquiry, this.TASKS[0]);
   },
 
+  // handle accepting a request & send encrypted key
   handleRequest(quantumMessage, enc, contextData) {
     const channelId = contextData.message.channel_id;
     const keyPair = enc.getExchangeKeyPair();
@@ -81,7 +82,7 @@ const exchange = {
 
     enc.setChannelKey(channelId, chatKey);
 
-    const encryptedChatKey = exchange.encrypt(
+    const encryptedChatKey = this.encrypt(
       receivedObject.publicKey,
       keyPair,
       chatKey
@@ -90,8 +91,18 @@ const exchange = {
     sendExchangePacket(channelId, response, this.TASKS[1]);
   },
 
+  // handle accepting & saving the key
   handleAcceptKey(quantumMessage, enc, contextData) {
-    log4q.log("Accepting key:\n", quantumMessage, enc, contextData);
+    const channelId = contextData.message.channel_id;
+    const keyPair = enc.getExchangeKeyPair();
+    const receivedObject = msgpack.decode(
+      naclUtil.decodeBase64(quantumMessage.content)
+    );
+    if (receivedObject?.flag === this.ACK && receivedObject.chatKey) {
+      const chatKey = this.decrypt(keyPair, receivedObject.chatKey);
+      enc.setChannelKey(channelId, chatKey);
+      log4q.log("Key was successfully accepted and saved.");
+    }
   },
 };
 
